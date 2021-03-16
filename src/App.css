@@ -25,7 +25,56 @@
 .infomation-container{
   width: 30%;
   height: 100%;
-  background-color: black;
+  background-color: #FDF5E6;
+  overflow: auto;
+}
+.infomation-table{
+  margin-top: 8vh;
+  width: 100%;
+}
+.infomation-table div{
+  cursor: pointer;
+}
+.infomation-table .info{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding:5px;
+}
+.infomation-table img{
+  width:40px;
+  height: 40px;
+}
+.infomation-table h5{
+  font-weight: bold;
+  text-align: start;
+  margin-left: 10px;
+  width:80%;
+}
+.infomation-table hr{
+  width:100%;
+  color:black;
+  margin:0;
+}
+.leaflet-control-container{
+  display: none;
+}
+.alert-box{
+  margin: 10px;
+  border-radius: 10px;
+  background-color: #ffffffaa;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 500;
+  width: 200px;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.leaflet-container span{
+  font-weight: bold;
 }
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
@@ -34,8 +83,13 @@
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 6vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width:100%;
+  z-index: 500;
+  background-color: #464646;
+  min-height: 8vh;
   display: flex;
   flex-direction: column;
   align-items: center;

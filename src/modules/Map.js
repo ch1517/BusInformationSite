@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, Tooltip } from 'react-leaflet';
 import { useState } from "react";
 import 'leaflet/dist/leaflet.css'
 import axios from 'axios';
@@ -36,7 +36,7 @@ function getBusStationInfo(props, center) {
 
 }
 function MapEvent(props) {
-    const [zoomLevel, setZoomLevel] = useState(props.zoomLevel); // initial zoom level provided for MapContainer
+    const [zoomLevel, setZoomLevel] = useState(16); // initial zoom level provided for MapContainer
     const map = useMap();
     var state = true; // 초기화 시 한번만 실행하기 위한 state 변수
 
@@ -47,35 +47,53 @@ function MapEvent(props) {
         },
         // 지도 움직임 종료
         moveend: () => {
+            console.log(zoomLevel)
+            if (zoomLevel > 14) {
+                getBusStationInfo(props, map.getCenter());
+            }
         },
         // 스크롤로 이동할 때 false
         dragend: () => {
-
-            getBusStationInfo(props, map.getCenter());
         }
     });
-    return (
-        <div></div>
-    );
+    if (zoomLevel < 15) {
+        return (
+            <div className="alert-box"><h4>조금 더 가까이 이동해주세요</h4></div>
+        )
+    } else {
+        return (
+            <div></div>
+        );
+    }
 }
 
 class Maps extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            station: []
+            position: [37.50937295468167, 127.0461450277878]
         }
-
-        this.setStation = this.setStation.bind(this);
     }
-    setStation(_station) {
-        this.setState({
-            station: _station
-        })
+    // station 값이 변경 됐을 경우에만 props 업데이트
+    shouldComponentUpdate(nextProps, nextState) {
+        if (this.props.station !== nextProps.station) {
+            return true
+        } else {
+            return false
+        }
     }
-
+    componentDidMount() {
+        navigator.geolocation.getCurrentPosition((position) => {
+            var latitude = position.coords.latitude;
+            var longitude = position.coords.longitude;
+            this.setState({
+                position: [latitude, longitude]
+            })
+        }, (error) => {
+            console.log(error);
+        });
+    }
     render() {
-        const position = [37.50937295468167, 127.0461450277878];
         let loveIcon = leaflet.icon({
             iconUrl: '../../marker.png',
             iconRetinaUrl: '../../marker.png',
@@ -86,20 +104,23 @@ class Maps extends Component {
         let vworld_url = "https://api.vworld.kr/req/wmts/1.0.0/" + apiKey.vworld_key + "/Base/{z}/{y}/{x}.png"
         return (
             <div className="map-container">
-                <MapContainer center={position} zoom={13} scrollWheelZoom={true}>
+                <MapContainer center={this.state.position} zoom={16} scrollWheelZoom={true}>
                     <TileLayer
                         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                         url={vworld_url}
                     />
-
-                    <MapEvent zoomLevel={this.props.zoomLevel} setStation={this.setStation} />
-                    {this.state.station.length > 0 &&
-                        this.state.station.map(({ gpslati, gpslong, nodenm }) => {
+                    <MapEvent zoomLevel={this.props.zoomLevel} setStation={this.props.setStation} />
+                    {this.props.station.length > 0 &&
+                        this.props.station.map(({ gpslati, gpslong, nodenm }) => {
                             return (
+
                                 <Marker position={[gpslati + "", gpslong + ""]} icon={loveIcon}>
                                     <Popup>
                                         <span>{nodenm}</span>
                                     </Popup>
+                                    <Tooltip direction='bottom' opacity={1} permanent>
+                                        <span>{nodenm}</span>
+                                    </Tooltip>
                                 </Marker>
                             )
                         })}
