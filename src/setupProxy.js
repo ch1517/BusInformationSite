@@ -10,7 +10,16 @@ module.exports = function (app) {
             pathRewrite: {
                 '^/busStationInfo': '' // URL ^/api -> 공백 변경
             }
-
+        })
+    );
+    app.use(
+        '/busArravalInfo',
+        createProxyMiddleware({
+            target: "http://openapi.tago.go.kr/openapi/service/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList",
+            changeOrigin: true,
+            pathRewrite: {
+                '^/busArravalInfo': '' // URL ^/api -> 공백 변경
+            }
         })
 
     );

@@ -6,7 +6,7 @@ import axios from 'axios';
 import leaflet from 'leaflet';
 import apiKey from '../private/apiKey.json'
 
-var serviceKey = apiKey.station_key; // 버스정류장 정보조회 Key
+const serviceKey = apiKey.station_key; // 버스정류장 정보조회 Key
 
 function getBusStationInfo(props, center) {
     var gpsLati = center["lat"];
@@ -95,8 +95,8 @@ class Maps extends Component {
     }
     render() {
         let loveIcon = leaflet.icon({
-            iconUrl: '../../marker.png',
-            iconRetinaUrl: '../../marker.png',
+            iconUrl: process.env.PUBLIC_URL + '/marker.png',
+            iconRetinaUrl: process.env.PUBLIC_URL + '/marker.png',
             iconAnchor: [25, 50],
             popupAnchor: [10, -44],
             iconSize: [50, 50],
