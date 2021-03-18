@@ -74,9 +74,9 @@ function Map(props) {
     let mapIcon = leaflet.icon({
         iconUrl: process.env.PUBLIC_URL + '/marker.png',
         iconRetinaUrl: process.env.PUBLIC_URL + '/marker.png',
-        iconAnchor: [25, 50],
-        popupAnchor: [10, -44],
-        iconSize: [50, 50],
+        iconAnchor: [15, 15],
+        popupAnchor: [0, 0],
+        iconSize: [30, 30],
     });
     let vworld_url = "https://api.vworld.kr/req/wmts/1.0.0/" + apiKey.vworld_key + "/Base/{z}/{y}/{x}.png"
     return (
@@ -90,10 +90,9 @@ function Map(props) {
                 {props.station.length > 0 &&
                     props.station.map(({ gpslati, gpslong, nodenm }) => {
                         return (
-
                             <Marker position={[gpslati + "", gpslong + ""]} icon={mapIcon}>
                                 <Popup>
-                                    <span>{nodenm}</span>
+                                    <span>{props.nodeid}</span>
                                 </Popup>
                                 <Tooltip direction='bottom' opacity={1} permanent>
                                     <span>{nodenm}</span>
