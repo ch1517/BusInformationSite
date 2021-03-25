@@ -9,10 +9,10 @@
 /coverage
 
 # private data
-/src/private
+# /src/private
 
 # production
-/build
+# /build
 
 # misc
 .DS_Store
