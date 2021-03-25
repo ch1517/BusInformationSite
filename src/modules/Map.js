@@ -7,27 +7,41 @@ import leaflet from 'leaflet';
 import apiKey from '../private/apiKey.json'
 
 const serviceKey = apiKey.station_key; // 버스정류장 정보조회 Key
-
+function objectToText(object) {
+    Object.keys(object).map(function (key) {
+        object[key] = object[key]._text;
+    });
+    return object;
+}
 function getBusStationInfo(props, center) {
     var gpsLati = center["lat"];
     var gpsLong = center["lng"];
-    var url = "?serviceKey=" + serviceKey + "&gpsLati=" + gpsLati + "&gpsLong=" + gpsLong;
-    axios.get('/busStationInfo' + url)
+    var parameter = "?serviceKey=" + serviceKey + "&gpsLati=" + gpsLati + "&gpsLong=" + gpsLong;
+    var url = '/api/BusSttnInfoInqireService/getCrdntPrxmtSttnList' + parameter;
+    console.log(url);
+    axios.get(url)
         .then(function (response) {
-            var responseText = JSON.parse(response.request.responseText);
-            if (responseText.response.header.resultCode == "00") {
+            console.log(response)
+            var data = response.request.response;
+            data = JSON.parse(data).response;
+            if (data.header.resultCode._text == "00") {
                 // api 조회 정상적으로 완료 했을 때 
-                var item = responseText.response.body.items.item;
-                if (item == null) {
+                var items = data.body.items.item;
+                if (items == null) {
                     props.setStation([]);
-                } else if (Array.isArray(item)) {
-                    props.setStation(item);
+                } else if (Array.isArray(items)) {
+                    items.forEach(item => {
+                        console.log(item)
+                        item = objectToText(item);
+                    });
+                    props.setStation(items);
                 } else {
-                    props.setStation([item]);
+                    items = objectToText(items);
+                    props.setStation([items]);
                 }
-                console.log(item);
+                console.log(items);
             } else {
-                console.log(responseText.response.header.resultCode)
+                console.log(data.header.resultCode)
             }
         })
         .catch(function (error) {
