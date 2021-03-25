@@ -9,6 +9,7 @@ const path = require('path');
 
 app.use(cors);
 app.use(bodyParser.json());
+// 위치 좌표 넘길 시 근처 버스 정류장 정보 조회
 app.use('/api/BusSttnInfoInqireService/getCrdntPrxmtSttnList', (req, res) => {
     var baseUrl = req.baseUrl.replace('/api', '');
     var parameter = req.url.replace('/', '');
@@ -20,7 +21,20 @@ app.use('/api/BusSttnInfoInqireService/getCrdntPrxmtSttnList', (req, res) => {
         res.json(body);
     });
 });
+//
 
+app.use('/api/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList', (req, res) => {
+    var baseUrl = req.baseUrl.replace('/api', '');
+    var parameter = req.url.replace('/', '');
+    request({
+        method: 'GET',
+        uri: 'http://openapi.tago.go.kr/openapi/service' + baseUrl + parameter
+    }, function (err, response, body) {
+        body = parser.xml2js(body, { compact: true, spaces: 4 })
+        console.log(body);
+        res.json(body);
+    });
+});
 app.listen(port, () => {
     console.log(`express is running on ${port}`);
 })

@@ -5,23 +5,17 @@ import 'leaflet/dist/leaflet.css'
 import axios from 'axios';
 import leaflet from 'leaflet';
 import apiKey from '../private/apiKey.json'
+import objectToText from '../parser'
 
 const serviceKey = apiKey.station_key; // 버스정류장 정보조회 Key
-function objectToText(object) {
-    Object.keys(object).map(function (key) {
-        object[key] = object[key]._text;
-    });
-    return object;
-}
+
 function getBusStationInfo(props, center) {
     var gpsLati = center["lat"];
     var gpsLong = center["lng"];
     var parameter = "?serviceKey=" + serviceKey + "&gpsLati=" + gpsLati + "&gpsLong=" + gpsLong;
     var url = '/api/BusSttnInfoInqireService/getCrdntPrxmtSttnList' + parameter;
-    console.log(url);
     axios.get(url)
         .then(function (response) {
-            console.log(response)
             var data = response.request.response;
             data = JSON.parse(data).response;
             if (data.header.resultCode._text == "00") {
@@ -31,7 +25,6 @@ function getBusStationInfo(props, center) {
                     props.setStation([]);
                 } else if (Array.isArray(items)) {
                     items.forEach(item => {
-                        console.log(item)
                         item = objectToText(item);
                     });
                     props.setStation(items);
@@ -39,7 +32,6 @@ function getBusStationInfo(props, center) {
                     items = objectToText(items);
                     props.setStation([items]);
                 }
-                console.log(items);
             } else {
                 console.log(data.header.resultCode)
             }
