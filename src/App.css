@@ -119,6 +119,7 @@
 .modal .info-content .station-name{
   font-weight: bold;
   margin: 0;
+  margin-bottom: 10px;
 }
 .modal .info-content .arrival-bus-info{
   display: flex;
@@ -161,13 +162,31 @@
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: white;    
+  font-weight: bold;
 }
 
 .App-link {
   color: #61dafb;
 }
-
+/* 모바일 */
+@media (max-width: 767px){
+  .contents{
+    flex-direction: column-reverse;
+  }
+	.map-container{
+    width: 100%;
+    height: 65%;
+  }
+  .infomation-container{
+    width:100%;
+    height: 35%;
+  }
+  .modal{
+    width:80%;
+    height: 50%;
+  }
+}
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

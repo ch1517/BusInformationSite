@@ -14,6 +14,7 @@ function getBusStationInfo(props, center) {
     var gpsLong = center["lng"];
     var parameter = "?serviceKey=" + serviceKey + "&gpsLati=" + gpsLati + "&gpsLong=" + gpsLong;
     var url = '/api/BusSttnInfoInqireService/getCrdntPrxmtSttnList' + parameter;
+
     axios.get(url)
         .then(function (response) {
             var data = response.request.response;
@@ -75,7 +76,7 @@ function MapEvent(props) {
 }
 
 function Map(props) {
-    const [position, setPosition] = useState([37.50937295468167, 127.0461450277878]);
+    const [position, setPosition] = useState([36.37412735693837, 127.36563659840922]);
 
     let mapIcon = leaflet.icon({
         iconUrl: process.env.PUBLIC_URL + '/marker.png',
@@ -94,11 +95,11 @@ function Map(props) {
                 />
                 <MapEvent zoomLevel={props.zoomLevel} setStation={props.setStation} />
                 {props.station.length > 0 &&
-                    props.station.map(({ gpslati, gpslong, nodenm }) => {
+                    props.station.map(({ gpslati, gpslong, nodenm, nodeid }) => {
                         return (
                             <Marker position={[gpslati + "", gpslong + ""]} icon={mapIcon}>
                                 <Popup>
-                                    <span>{props.nodeid}</span>
+                                    <span>{nodeid}</span>
                                 </Popup>
                                 <Tooltip direction='bottom' opacity={1} permanent>
                                     <span>{nodenm}</span>

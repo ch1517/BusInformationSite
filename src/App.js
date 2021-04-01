@@ -52,6 +52,18 @@ function App(props) {
               })
               console.log(newArr)
 
+            } else if (typeof (items) === 'object') {
+              items = objectToText(items);
+
+              var newInfo = {};
+              var routeid = items['routeid'];
+              newInfo['routeno'] = items['routeno'];
+              newInfo['arrtime'] = items['arrtime'];
+              newInfo['arrprevstationcnt'] = items['arrprevstationcnt'];
+              if (newArr[routeid] == null) {
+                newArr[routeid] = []
+              }
+              newArr[routeid].push(newInfo);
             } else {
               console.log(items);
             }
