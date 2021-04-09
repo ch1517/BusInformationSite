@@ -1,13 +1,15 @@
-import React from 'react';
+import { React } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, Tooltip } from 'react-leaflet';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import 'leaflet/dist/leaflet.css'
 import axios from 'axios';
 import leaflet from 'leaflet';
 import apiKey from '../private/apiKey.json'
 import objectToText from '../parser'
+import { unmountComponentAtNode } from 'react-dom';
 
 const serviceKey = apiKey.station_key; // 버스정류장 정보조회 Key
+const BASE_ZOOM_LEVEL = 13;
 
 function getBusStationInfo(props, center) {
     var gpsLati = center["lat"];
@@ -44,9 +46,9 @@ function getBusStationInfo(props, center) {
 }
 function MapEvent(props) {
     const [zoomLevel, setZoomLevel] = useState(16); // initial zoom level provided for MapContainer
+
     const map = useMap();
     var state = true; // 초기화 시 한번만 실행하기 위한 state 변수
-    const BASE_ZOOM_LEVEL = 13
 
     const mapEvents = useMapEvents({
         // 지도 zoom 종료
@@ -74,9 +76,29 @@ function MapEvent(props) {
         );
     }
 }
+function CustomTooltip(props) {
+    useEffect(() => {
+        return () => {
+            props.setSelectID(-1);
+        };
+    }, []);
+    return (
+        <Tooltip direction="top" opacity={1} permanent interactive>
+            <div className={props.selectID == props.nodeid ? "select" : ""}>
+                <div><img className="busIcon" src={process.env.PUBLIC_URL + props.selectID == props.nodeid ? '/marker.png' : '/marker_white.png'} /></div>
+                <div>
+                    <span>{props.nodenm}</span>
+                    <span>{props.nodeid}</span>
+                </div>
+            </div>
+        </Tooltip>
+    )
 
+
+}
 function Map(props) {
     const [position, setPosition] = useState([36.37412735693837, 127.36563659840922]);
+    const [selectID, setSelectID] = useState(-1);
 
     let mapIcon = leaflet.icon({
         iconUrl: process.env.PUBLIC_URL + '/marker.png',
@@ -85,6 +107,12 @@ function Map(props) {
         popupAnchor: [0, 0],
         iconSize: [30, 30],
     });
+
+    let tooltipClick = (nodenm, nodeid, citycode) => {
+        setSelectID(nodeid);
+        props.openModal(nodenm, nodeid, citycode)
+    }
+
     let vworld_url = "https://api.vworld.kr/req/wmts/1.0.0/" + apiKey.vworld_key + "/Base/{z}/{y}/{x}.png"
     return (
         <div className="map-container">
@@ -95,15 +123,12 @@ function Map(props) {
                 />
                 <MapEvent zoomLevel={props.zoomLevel} setStation={props.setStation} />
                 {props.station.length > 0 &&
-                    props.station.map(({ gpslati, gpslong, nodenm, nodeid }) => {
+                    props.station.map(({ gpslati, gpslong, nodenm, nodeid, citycode }, index) => {
                         return (
-                            <Marker position={[gpslati + "", gpslong + ""]} icon={mapIcon}>
-                                <Popup>
-                                    <span>{nodeid}</span>
-                                </Popup>
-                                <Tooltip direction='bottom' opacity={1} permanent>
-                                    <span>{nodenm}</span>
-                                </Tooltip>
+                            <Marker position={[gpslati + "", gpslong + ""]} icon={mapIcon} permanent
+                                eventHandlers={{ click: tooltipClick.bind(this, nodenm, nodeid, citycode) }}>
+                                <CustomTooltip gpslati={gpslati} gpslong={gpslong} nodenm={nodenm} nodeid={nodeid}
+                                    citycode={citycode} setSelectID={setSelectID} selectID={selectID} />
                             </Marker>
                         )
                     })}

@@ -1,5 +1,5 @@
 {
-  "name": "bus_infomation_site",
+  "name": "bus_information_site",
   "version": "0.1.0",
   "private": true,
   "engines": {
@@ -13,7 +13,6 @@
     "axios": "^0.21.1",
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "gh-pages": "^3.1.0",
     "http-proxy-middleware": "^1.0.6",
     "leaflet": "^1.7.1",
     "react": "^17.0.1",
@@ -31,8 +30,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "predeploy": "npm run build"
   },
   "eslintConfig": {
     "extends": [

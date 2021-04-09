@@ -83,7 +83,7 @@ function App(props) {
     <div className="App">
       <Header />
       <div className="contents">
-        <Map station={station} setStation={setStation} />
+        <Map station={station} setStation={setStation} openModal={openModal} />
         <Information station={station} openModal={openModal} />
         <PopUp isOpen={isModalOpen} close={() => setIsModalOpen(false)}
           nodenm={nodenm} arravalInfo={arravalInfo}

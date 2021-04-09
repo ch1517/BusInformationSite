@@ -7,7 +7,7 @@ function BusArravalInfo(props) {
             const time = parseInt(parseInt(arrtime) / 60);
             return (
                 <div>
-                    <span>{time < 3 ? ("잠시후 도착") : (`${time}분 후`)}</span>
+                    <span>{time < 3 ? ("잠시 후 도착") : (`${time}분 후`)}</span>
                     <span>{arrprevstationcnt} 정거장 전</span>
                 </div>
 
