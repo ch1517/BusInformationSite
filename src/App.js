@@ -9,14 +9,23 @@ import axios from 'axios';
 import objectToText from './parser';
 
 function App(props) {
+  const [zoomLevel, setZoomLevel] = useState(16); // initial zoom level provided for MapContainer
+  const [position, setPosition] = useState([36.37412735693837, 127.36563659840922]);
   const [station, setStation] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [nodenm, setNodenm] = useState(null);
   const [arravalInfo, setArravalInfo] = useState({});
+  const [selectID, setSelectID] = useState(-1);
 
-  const openModal = (_nodenm, _nodeid, _citycode) => {
+  var [mapState, setMapState] = useState(false); // 지도 업데이트 제어변수 
+
+  const openModal = (_gpslati, _gpslong, _nodenm, _nodeid, _citycode) => {
+    setPosition([_gpslati, _gpslong]);
     getBusArravalInfo(_citycode, _nodeid);
     setNodenm(_nodenm);
+    setSelectID(_nodeid);
+    setZoomLevel(18);
+    setMapState(true); // Marker 클릭 시 Map 업데이트 true
   };
 
   const getBusArravalInfo = (citycode, nodeid) => {
@@ -50,7 +59,6 @@ function App(props) {
                 }
                 newArr[routeid].push(newInfo);
               })
-              console.log(newArr)
 
             } else if (typeof (items) === 'object') {
               items = objectToText(items);
@@ -83,7 +91,11 @@ function App(props) {
     <div className="App">
       <Header />
       <div className="contents">
-        <Map station={station} setStation={setStation} openModal={openModal} />
+        <Map station={station} setStation={setStation} openModal={openModal}
+          position={position}
+          selectID={selectID} setSelectID={setSelectID}
+          zoomLevel={zoomLevel} setZoomLevel={setZoomLevel}
+          mapState={mapState} setMapState={setMapState} />
         <Information station={station} openModal={openModal} />
         <PopUp isOpen={isModalOpen} close={() => setIsModalOpen(false)}
           nodenm={nodenm} arravalInfo={arravalInfo}

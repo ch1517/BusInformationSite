@@ -6,9 +6,9 @@ function Information(props) {
         <div className="infomation-container">
             <div className="infomation-table">
                 {props.station.length > 0 &&
-                    props.station.map(({ nodenm, nodeid, citycode }) => {
+                    props.station.map(({ gpslati, gpslong, nodenm, nodeid, citycode }) => {
                         return (
-                            <div onClick={() => props.openModal(nodenm, nodeid, citycode)}>
+                            <div onClick={() => props.openModal(gpslati, gpslong, nodenm, nodeid, citycode)}>
                                 <div className='info'>
                                     <img src={process.env.PUBLIC_URL + '/marker.png'} />
                                     <h5>{nodenm}({nodeid})</h5>
