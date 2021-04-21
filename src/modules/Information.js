@@ -13,7 +13,6 @@ function Information(props) {
                                     <img src={process.env.PUBLIC_URL + '/marker.png'} />
                                     <h5>{nodenm}({nodeid})</h5>
                                 </div>
-                                <hr />
                             </div>
                         )
                     })

@@ -40,6 +40,7 @@
   flex-direction: row;
   align-items: center;
   padding:5px;
+  border-bottom: 1px solid black;
 }
 .infomation-table img{
   width:40px;
@@ -50,11 +51,6 @@
   text-align: start;
   margin-left: 10px;
   width:80%;
-}
-.infomation-table hr{
-  width:100%;
-  color:black;
-  margin:0;
 }
 .leaflet-control-container{
   display: none;
@@ -150,12 +146,13 @@
   background: #fff;
   display: flex;
   flex-direction: column;
+  border-radius: 20px;
 }
 .modal button{
   width:30px;
   height: 30px;
   align-self: flex-end;
-  margin: 10px;
+  margin: 20px;
   font-size: 20px;
   font-weight: bold;
   background: #00000000;
@@ -172,34 +169,50 @@
 .modal .info-content .station-name{
   font-weight: bold;
   margin: 0;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+  font-size:1.5em;
+}
+.modal .info-content .station-name font{
+  padding:5px 15px;
+  background-color: antiquewhite;
 }
 .modal .info-content .arrival-bus-info{
   display: flex;
   justify-content: space-around;
-  margin: 15px;
+  align-items: center;
+  padding: 15px;
+  border-bottom :1px solid black;
+  cursor: pointer;
 }
+
 .info img{
   margin: 10px;
-}
-.arrival-bus-container{
-  width:60%;
-}
-.arrival-bus-container div{
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 10px;
 }
 .modal .info-content .route-number{
   font-weight: bold;
   vertical-align: middle;
+  width: 30%;
 }
 .arrival-info-container{
   width: 100%;
   height: 100%;
   overflow: auto;
+  border-top :1px solid black;
 }
-
+.arrival-bus-container{
+  width:70%;
+}
+.arrival-bus-container div{
+  width:100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding-bottom: 5px;
+  padding-top: 5px;
+}
+.arrival-bus-container div span{
+  width:50%;
+}
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;

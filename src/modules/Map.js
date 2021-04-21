@@ -10,7 +10,15 @@ import objectToText from '../parser';
 const serviceKey = apiKey.station_key; // 버스정류장 정보조회 Key
 const BASE_ZOOM_LEVEL = 13;
 
-function getBusStationInfo(props, apiState, center) {
+// 화면의 latlng 내에 있는지 체크
+function checkLatLngOut(item, _southWest, _northEast) {
+    if (item["gpslati"] < _southWest.lat || item["gpslati"] > _northEast.lat
+        || item["gpslong"] < _southWest.lng || item["gpslong"] > _northEast.lng)
+        return false;
+    return true;
+}
+
+function getBusStationInfo(props, apiState, center, _southWest, _northEast) {
     var gpsLati = center["lat"];
     var gpsLong = center["lng"];
     var parameter = "?serviceKey=" + serviceKey + "&gpsLati=" + gpsLati + "&gpsLong=" + gpsLong;
@@ -23,17 +31,26 @@ function getBusStationInfo(props, apiState, center) {
                 if (data.header.resultCode._text == "00") {
                     // api 조회 정상적으로 완료 했을 때 
                     var items = data.body.items.item;
+                    var newData = [];
                     if (items == null) {
-                        props.setStation([]);
+                        newData = [];
                     } else if (Array.isArray(items)) {
-                        items.forEach(item => {
+                        items.forEach(function (item, index, object) {
                             item = objectToText(item);
+                            if (checkLatLngOut(item, _southWest, _northEast)) {
+                                newData.push(item);
+                            }
                         });
-                        props.setStation(items);
                     } else {
                         items = objectToText(items);
-                        props.setStation([items]);
+                        if (!checkLatLngOut(items, _southWest, _northEast)) {
+                            newData = [items];
+                        } else {
+                            newData = [];
+                        }
                     }
+
+                    props.setStation(newData);
                 } else {
                     console.log(data.header.resultCode);
                 }
@@ -49,7 +66,7 @@ function MapEvent(props) {
     var apiState = props.apiState;
     const costomEvent = (mapEvents) => {
         if (mapEvents.getZoom() > BASE_ZOOM_LEVEL) {
-            getBusStationInfo(props, apiState, map.getCenter());
+            getBusStationInfo(props, apiState, map.getCenter(), map.getBounds()._southWest, map.getBounds()._northEast);
             apiState = true;
         }
     }

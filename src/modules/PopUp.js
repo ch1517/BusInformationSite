@@ -25,7 +25,7 @@ function PopUp(props) {
                     <div className="modal">
                         <button onClick={close}>X</button>
                         <div className="info-content">
-                            <h3 className="station-name">{props.nodenm}</h3>
+                            <h3 className="station-name"><font>{props.nodenm}</font></h3>
                             <div className="arrival-info-container">
                                 {Object.keys(props.arravalInfo).length > 0 &&
                                     Object.keys(props.arravalInfo).map((key, index) => {
