@@ -85,15 +85,7 @@ function MapEvent(props) {
             apiState = true;
         }
     });
-    if (props.zoomLevel < BASE_ZOOM_LEVEL + 1) {
-        return (
-            <div className="alert-box"><h4>조금 더 가까이 이동해주세요</h4></div>
-        )
-    } else {
-        return (
-            <div></div>
-        );
-    }
+    return (null)
 }
 function CustomTooltip(props) {
     useEffect(() => {
@@ -117,6 +109,7 @@ function CustomTooltip(props) {
 }
 function Map(props) {
     var [apiState, setApiState] = useState(true);
+    const BASE_ZOOM_LEVEL = 13;
 
     let mapIcon = leaflet.icon({
         iconUrl: process.env.PUBLIC_URL + '/marker.png',
@@ -134,6 +127,9 @@ function Map(props) {
     let vworld_url = "https://api.vworld.kr/req/wmts/1.0.0/" + apiKey.vworld_key + "/Base/{z}/{y}/{x}.png"
     return (
         <div className="map-container">
+
+            {props.zoomLevel < BASE_ZOOM_LEVEL + 1 ? <div className="alert-box"><h5>조금 더 가까이 이동해주세요</h5></div> : <div></div>}
+
             <MapContainer center={props.position} zoom={props.zoomLevel} scrollWheelZoom={true}>
                 <TileLayer maxZoom={22} maxNativeZoom={18} zoom={props.zoomLevel}
                     attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'

@@ -58,11 +58,12 @@
 }
 .alert-box{
   margin: 10px;
+  padding:10px;
   border-radius: 10px;
   background-color: #ffffffaa;
   position: absolute;
   bottom: 0;
-  right: 0;
+  right: 30%;
   z-index: 500;
   width: 200px;
   height: 80px;
@@ -242,6 +243,10 @@
 }
 /* 모바일 */
 @media (max-width: 767px){
+  .alert-box{
+    right: 0;
+    bottom: 0;
+  }
   .contents{
     flex-direction: column-reverse;
   }
