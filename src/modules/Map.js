@@ -65,7 +65,7 @@ function MapEvent(props) {
     // var state = true; // 초기화 시 한번만 실행하기 위한 state 변수
     var apiState = props.apiState;
     const costomEvent = (mapEvents) => {
-        if (mapEvents.getZoom() > BASE_ZOOM_LEVEL) {
+        if (mapEvents.getZoom() > BASE_ZOOM_LEVEL && props.mapMode) {
             getBusStationInfo(props, apiState, map.getCenter(), map.getBounds()._southWest, map.getBounds()._northEast);
             apiState = true;
         }
@@ -135,7 +135,7 @@ function Map(props) {
                     attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                     url={vworld_url}
                 />
-                <MapEvent apiState={apiState} zoomLevel={props.zoomLevel} setZoomLevel={props.setZoomLevel} setStation={props.setStation} />
+                <MapEvent apiState={apiState} mapMode={props.mapMode} zoomLevel={props.zoomLevel} setZoomLevel={props.setZoomLevel} setStation={props.setStation} />
                 <MapConsumer>
                     {(map) => {
                         if (props.mapState) { // Marker 위치, zoomLevel 19로 지도 업데이트
@@ -146,7 +146,7 @@ function Map(props) {
                         return null
                     }}
                 </MapConsumer>
-                {props.station.length > 0 &&
+                {props.mapMode && props.station.length > 0 &&
                     props.station.map(({ gpslati, gpslong, nodenm, nodeid, citycode }, index) => {
                         return (
                             <Marker position={[gpslati + "", gpslong + ""]} icon={mapIcon} permanent

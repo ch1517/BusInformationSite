@@ -1,6 +1,9 @@
 
 import React, { Component, useState } from 'react';
 
+function onclickBusName(props) {
+    props.setMapMode(false);
+}
 function BusArravalInfo(props) {
     return (
         props.array.map(({ routeno, arrprevstationcnt, arrtime }) => {
@@ -30,7 +33,11 @@ function PopUp(props) {
                                 {Object.keys(props.arravalInfo).length > 0 &&
                                     Object.keys(props.arravalInfo).map((key, index) => {
                                         return (
-                                            <div className="arrival-bus-info">
+                                            <div className="arrival-bus-info" onClick={() => {
+                                                onclickBusName(props, close)
+                                                close() // popup 닫기
+                                            }
+                                            }>
                                                 <span className="route-number">{props.arravalInfo[key][0]['routeno']}번</span>
                                                 <span className="arrival-bus-container">
                                                     <BusArravalInfo array={props.arravalInfo[key]} ></BusArravalInfo>

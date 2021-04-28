@@ -16,6 +16,8 @@ function App(props) {
   const [nodenm, setNodenm] = useState(null);
   const [arravalInfo, setArravalInfo] = useState({});
   const [selectID, setSelectID] = useState(-1);
+  // True 인 경우 주변 정류장 정보 API 호출 
+  const [mapMode, setMapMode] = useState(true);
 
   var [mapState, setMapState] = useState(false); // 지도 업데이트 제어변수 
 
@@ -95,10 +97,11 @@ function App(props) {
           position={position}
           selectID={selectID} setSelectID={setSelectID}
           zoomLevel={zoomLevel} setZoomLevel={setZoomLevel}
-          mapState={mapState} setMapState={setMapState} />
-        <Information station={station} openModal={openModal} />
+          mapState={mapState} setMapState={setMapState}
+          mapMode={mapMode} />
+        <Information station={station} openModal={openModal} mapMode={mapMode} />
         <PopUp isOpen={isModalOpen} close={() => setIsModalOpen(false)}
-          nodenm={nodenm} arravalInfo={arravalInfo}
+          nodenm={nodenm} arravalInfo={arravalInfo} mapMode={mapMode} setMapMode={setMapMode}
         />
       </div>
     </div>
