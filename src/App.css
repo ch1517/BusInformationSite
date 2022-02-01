@@ -26,23 +26,25 @@
   background-color: black;
 }
 
-.infomation-container {
+.information-container {
   width: 25%;
   height: 100%;
-  background-color: #FDF5E6;
+  background-color: white;
   overflow: auto;
+  z-index: 400;
+  box-shadow: -4px 0 2px -2px #8080806b;
 }
 
-.infomation-table {
-  margin-top: 8vh;
+.information-table {
+  margin-top: 60px;
   width: 100%;
 }
 
-.infomation-table div {
+.information-table div {
   cursor: pointer;
 }
 
-.infomation-table .info {
+.information-table .info {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -50,12 +52,12 @@
   border-bottom: 1px solid black;
 }
 
-.infomation-table img {
+.information-table img {
   width: 40px;
   height: 40px;
 }
 
-.infomation-table h5 {
+.information-table h5 {
   font-weight: bold;
   text-align: start;
   margin-left: 10px;
@@ -73,10 +75,10 @@
   background-color: #ffffffaa;
   position: absolute;
   bottom: 0;
-  right: 30%;
+  right: 25%;
   z-index: 500;
-  width: 200px;
-  height: 80px;
+  width: 250px;
+  height: 100px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -87,8 +89,8 @@
 }
 
 .busIcon {
-  width: 25px;
-  height: 25px;
+  width: 20px;
+  height: 20px;
   padding: 2px;
 }
 
@@ -111,7 +113,7 @@
   border-radius: 50px;
   padding: 5px;
   border-width: 2px;
-  border: 2px solid #1478ff;
+  border: 3px solid #1478ff;
   box-shadow: 0 1px 3px rgb(0 0 0 / 40%);
 }
 
@@ -144,8 +146,12 @@
 }
 
 .leaflet-tooltip>div div span:first-child {
-  font-size: 15px;
+  font-size: 0.85rem;
   font-weight: bold;
+}
+
+.leaflet-tooltip>div div span:last-child {
+  font-size: 0.6rem;
 }
 
 /* Popup.js */
@@ -180,17 +186,19 @@
   margin: 20px;
   font-size: 20px;
   font-weight: bold;
-  background: #00000000;
+  background-color: transparent;
+  color: black;
   border: none;
   cursor: pointer;
 }
 
 .modal .info-content {
-  width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
+  align-items: center;
   overflow: auto;
+  margin: 0 2rem 2rem 2rem;
 }
 
 .modal .info-content .station-name {
@@ -198,20 +206,28 @@
   margin: 0;
   margin-bottom: 20px;
   font-size: 1.5em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: fit-content;
+}
+
+.modal .info-content .station-name .node-id {
+  font-size: 1rem;
+}
+
+.modal .info-content .station-name .refresh {
+  margin-left: 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  position: absolute;
+  right: -2rem;
 }
 
 .modal .info-content .station-name font {
   padding: 5px 15px;
   background-color: antiquewhite;
-}
-
-.modal .info-content .arrival-bus-info {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 15px;
-  border-bottom: 1px solid black;
-  cursor: pointer;
 }
 
 .info img {
@@ -228,7 +244,19 @@
   width: 100%;
   height: 100%;
   overflow: auto;
+}
+
+.modal .info-content .arrival-info-container>div:first-child {
   border-top: 1px solid black;
+}
+
+.modal .info-content .arrival-info-container>div {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid black;
+  cursor: pointer;
 }
 
 .arrival-bus-container {
@@ -266,6 +294,7 @@
   align-items: center;
   justify-content: flex-start;
   font-size: calc(10px + 2vmin);
+  box-shadow: 0 4px 2px -2px gray;
   color: white;
   font-weight: bold;
 }
@@ -282,7 +311,7 @@
 @media (max-width: 767px) {
   .alert-box {
     right: 0;
-    bottom: 0;
+    top: 60px;
   }
 
   .contents {
@@ -291,18 +320,53 @@
 
   .map-container {
     width: 100%;
-    height: 65%;
+    height: 100%;
   }
 
-  .infomation-container {
-    width: 100%;
-    height: 30%;
+  .information-container {
+    display: none;
   }
 
   .modal {
     width: 80%;
     height: 50%;
+    position: relative;
   }
+
+  .modal>button {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  .modal .info-content {
+    margin-top: 2rem;
+  }
+
+  .modal .info-content .station-name {
+    font-size: 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal .info-content .station-name .node-id {
+    font-size: 0.85rem;
+  }
+
+  .modal .info-content .station-name .refresh {
+    font-size: 0.85rem;
+    margin-left: 1rem;
+  }
+
+  .modal .info-content .route-number {
+    font-size: 0.85rem;
+  }
+
+
+  .arrival-bus-container div span {
+    font-size: 0.75rem;
+  }
+
 }
 
 @keyframes App-logo-spin {

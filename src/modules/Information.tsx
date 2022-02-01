@@ -16,9 +16,9 @@ interface InformationProps {
 }
 const Information: React.FC<InformationProps> = ({ mapMode, station, openModal }) => {
   return (
-    <div className="infomation-container">
+    <div className="information-container">
       {mapMode ? (
-        <div className="infomation-table">
+        <div className="information-table">
           {/* Map mode false인 경우 버스 노선 그리기  */}
           {station.length > 0 &&
             station.map(({ citycode, gpslati, gpslong, nodenm, nodeid }: BusStopInterface, index) => {
