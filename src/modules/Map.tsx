@@ -20,7 +20,14 @@ const checkLatLngOut = (item: any, _southWest: LatLngInterface, _northEast: LatL
     return false;
   return true;
 }
-// api request [나중에 분리]
+/**
+ * 정류장 정보가 두 개씩 나오는 경우 하나 필터링
+ * @param nodeid 
+ * @returns 
+ */
+const nodeidFiltering = (nodeid: string) => {
+  return !nodeid.includes('GHB')
+}
 const getBusStationInfo = (setStation: (station: any[]) => void, apiState: boolean, center: LatLngInterface, _southWest: LatLngInterface, _northEast: LatLngInterface) => {
   let gpsLati = center["lat"];
   let gpsLong = center["lng"];
@@ -39,7 +46,7 @@ const getBusStationInfo = (setStation: (station: any[]) => void, apiState: boole
             newData = [];
           } else if (Array.isArray(items)) {
             items.forEach((item) => {
-              if (checkLatLngOut(item, _southWest, _northEast)) {
+              if (checkLatLngOut(item, _southWest, _northEast) && nodeidFiltering(item.nodeid)) {
                 newData.push(item);
               }
             });
@@ -51,7 +58,6 @@ const getBusStationInfo = (setStation: (station: any[]) => void, apiState: boole
             }
           }
           setStation(newData);
-          console.log("newData", newData)
         } else {
           console.log(data);
         }
@@ -64,14 +70,14 @@ const getBusStationInfo = (setStation: (station: any[]) => void, apiState: boole
 interface MapEventProps {
   position: [number, number];
   apiState: boolean;
-  isModalOpen: boolean;
   setPosition: (position: [number, number]) => void;
   setApiState: (apiState: boolean) => void;
   setStation: (station: any[]) => void;
   setZoomLevel: (zoomLevel: number) => void;
+  setZoomState: (zoomState: boolean) => void;
 }
 
-const MapEvent: React.FC<MapEventProps> = ({ position, apiState, isModalOpen, setPosition, setApiState, setStation, setZoomLevel }) => {
+const MapEvent: React.FC<MapEventProps> = ({ position, apiState, setPosition, setApiState, setStation, setZoomLevel, setZoomState }) => {
   const map = useMap();
 
   useEffect(() => {
@@ -86,7 +92,7 @@ const MapEvent: React.FC<MapEventProps> = ({ position, apiState, isModalOpen, se
 
   // var state = true; // 초기화 시 한번만 실행하기 위한 state 변수
   const costomEvent = (zoomLevel: number) => {
-    if (zoomLevel >= BASE_ZOOM_LEVEL && !isModalOpen) {
+    if (zoomLevel >= BASE_ZOOM_LEVEL && apiState) {
       getBusStationInfo(setStation, apiState, map.getCenter(), map.getBounds().getSouthWest(), map.getBounds().getNorthEast());
       // setApiState(true);
     }
@@ -94,11 +100,13 @@ const MapEvent: React.FC<MapEventProps> = ({ position, apiState, isModalOpen, se
   const mapEvents = useMapEvents({
     zoomstart: () => {
       setApiState(false);
+      setZoomState(false);
     },
     // 지도 zoom 종료
     zoomend: () => {
       setZoomLevel(mapEvents.getZoom()); // 현재 지도의 center lat, lng 가져오기
       setApiState(true);
+      setZoomState(true);
     },
     // 지도 움직임 종료
     moveend: () => {
@@ -107,6 +115,7 @@ const MapEvent: React.FC<MapEventProps> = ({ position, apiState, isModalOpen, se
     // 스크롤로 이동할 때 false
     dragend: () => {
       setApiState(true);
+      setZoomState(true);
     }
   });
   return <></>
@@ -134,18 +143,19 @@ interface MapInterface {
   zoomLevel: number;
   station: any[];
   selectID: string;
-  isModalOpen: boolean;
+  apiState: boolean;
   setPosition: (position: [number, number]) => void;
   setStation: (station: any[]) => void;
   setZoomLevel: (zoomLevel: number) => void;
   setSelectID: (selectID: string) => void;
-  openModal: (citycode: number, gpslati: number, gpslong: number, nodeid: string, nodenm: string) => void;
+  settingBusStop: (citycode: number, gpslati: number, gpslong: number, nodeid: string, nodenm: string) => void;
+  setApiState: (apiState: boolean) => void;
 }
-const Map: React.FC<MapInterface> = ({ position, zoomLevel, station, selectID, isModalOpen, setPosition, setZoomLevel, setStation, setSelectID, openModal }) => {
+const Map: React.FC<MapInterface> = ({ position, zoomLevel, station, selectID, apiState, setPosition, setZoomLevel, setStation, setSelectID, settingBusStop, setApiState }) => {
   const BASE_ZOOM_LEVEL = 15;
   const vworld_url = `https://api.vworld.kr/req/wmts/1.0.0/${apiKey.vworld_key}/Base/{z}/{y}/{x}.png`;
 
-  var [apiState, setApiState] = useState(true);
+  const [zoomState, setZoomState] = useState(true);
 
   let mapIcon = leaflet.icon({
     iconUrl: process.env.PUBLIC_URL + '/marker.png',
@@ -157,7 +167,7 @@ const Map: React.FC<MapInterface> = ({ position, zoomLevel, station, selectID, i
 
   let tooltipClick = (citycode: number, gpslati: number, gpslong: number, nodenm: string, nodeid: string) => {
     setSelectID(nodeid);
-    openModal(citycode, gpslati, gpslong, nodeid, nodenm);
+    settingBusStop(citycode, gpslati, gpslong, nodeid, nodenm);
   }
 
   return (
@@ -168,12 +178,12 @@ const Map: React.FC<MapInterface> = ({ position, zoomLevel, station, selectID, i
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
           url={vworld_url}
         />
-        <MapEvent apiState={apiState} setApiState={setApiState} isModalOpen={isModalOpen}
+        <MapEvent apiState={apiState} setApiState={setApiState}
           position={position} setPosition={setPosition}
-          setZoomLevel={setZoomLevel} setStation={setStation} />
+          setZoomLevel={setZoomLevel} setStation={setStation}
+          setZoomState={setZoomState} />
         {/* zoom 중인 경우 marker 표시를 안하기 위해서 apiState 추가 */}
-        {/* modal이 띄워진 상태에서는 marker 표시를 하지 않는다.(가려져서 안보임) */}
-        {apiState && !isModalOpen
+        {zoomState
           && zoomLevel >= BASE_ZOOM_LEVEL
           && station.length > 0 &&
           station.map(({ citycode, gpslati, gpslong, nodeid, nodenm }, index) => {

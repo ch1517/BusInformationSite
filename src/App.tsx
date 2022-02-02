@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import './App.css';
 import Map from './modules/Map';
-import Information from './modules/Information';
+import Information from './modules/information';
 import Header from './modules/Header';
-import PopUp from './modules/PopUp';
 
 interface BusStopInterface {
   citycode: number;
@@ -17,13 +16,13 @@ const App = () => {
   const [zoomLevel, setZoomLevel] = useState<number>(16); // initial zoom level provided for MapContainer
   const [position, setPosition] = useState<[number, number]>([36.37412735693837, 127.36563659840922]);
   const [station, setStation] = useState<any[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectBusStop, setSelectBusStop] = useState<BusStopInterface | null>(null);
   const [selectID, setSelectID] = useState<string>("-1");
   // True 인 경우 주변 정류장 정보 API 호출 
-  const [mapMode,] = useState<boolean>(true);
+  const [mapMode, setMapMode] = useState<number>(0);
+  const [apiState, setApiState] = useState(true);
 
-  const openModal = (_citycode: number, _gpslati: number, _gpslong: number, _nodeid: string, _nodenm: string) => {
+  const settingBusStop = (_citycode: number, _gpslati: number, _gpslong: number, _nodeid: string, _nodenm: string) => {
     let busStop: BusStopInterface = {
       citycode: _citycode,
       gpslati: _gpslati,
@@ -35,6 +34,8 @@ const App = () => {
     setSelectBusStop(busStop);
     setSelectID(_nodeid);
     setZoomLevel(18);
+    setApiState(false);
+    setMapMode(1);
   };
 
   return (
@@ -42,14 +43,19 @@ const App = () => {
       <Header />
       <div className="contents">
         <Map station={station} setStation={setStation}
-          isModalOpen={isModalOpen} openModal={openModal}
+          settingBusStop={settingBusStop}
           position={position} setPosition={setPosition}
           selectID={selectID} setSelectID={setSelectID}
-          zoomLevel={zoomLevel} setZoomLevel={setZoomLevel} />
-        <Information station={station} openModal={openModal} mapMode={mapMode} />
-        <PopUp isOpen={isModalOpen} setIsModalOpen={setIsModalOpen}
-          selectBusStop={selectBusStop}
-        />
+          zoomLevel={zoomLevel} setZoomLevel={setZoomLevel}
+          apiState={apiState} setApiState={setApiState} />
+        <Information station={station} settingBusStop={settingBusStop}
+          mapMode={mapMode} selectBusStop={selectBusStop} />
+        <button className="mode-change-button"
+          onClick={() => {
+            setMapMode(0);
+          }}>
+          <i className="fas fa-times"></i>
+        </button>
       </div>
     </div>
   )

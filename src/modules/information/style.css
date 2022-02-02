@@ -1,0 +1,137 @@
+.information-container {
+    width: 25%;
+    height: 100%;
+    background-color: white;
+    overflow: auto;
+    z-index: 500;
+    box-shadow: -4px 0 2px -2px #8080806b;
+    display: flex;
+    flex-direction: column;
+}
+
+.information-container .loading {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.information-container .bus-arraval-list {
+    margin: 1rem;
+    overflow-y: auto;
+}
+
+.information-container .bus-arraval-list svg {
+    width: 20px;
+    height: 20px;
+    padding-top: 0.2rem;
+}
+
+.information-container .bus-arraval-list>div {
+    border-bottom: 1px solid #dcdcdc;
+    padding: 0.75rem 1rem;
+    display: flex;
+}
+
+.information-container .bus-arraval-list>div .info-div {
+    margin-left: 1rem;
+    flex: 1 1;
+}
+
+.information-container .bus-arraval-list>div:first-child {
+    border-top: 1px solid #dcdcdc;
+}
+
+.information-container .bus-arraval-list div {
+    text-align: left;
+    cursor: pointer;
+}
+
+.information-container .bus-arraval-list .route-info {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.information-container .bus-arraval-list .route-info .route-number {
+    font-size: 1.25rem;
+    font-weight: bold;
+    padding-bottom: 0.25rem;
+}
+
+.information-container .bus-arraval-list .route-info .route-start-end {
+    color: gray;
+    font-size: 0.75rem;
+}
+
+.information-container .bus-arraval-list .arraval-info {
+    font-size: 0.85rem;
+}
+
+.information-container .bus-arraval-list .arraval-info span {
+    margin-right: 0.5rem;
+    font-weight: bold;
+}
+
+.information-container .bus-arraval-list .arraval-info span:first-child {
+    color: #CC1100
+}
+
+.information-table {
+    width: 100%;
+}
+
+.information-table div {
+    cursor: pointer;
+}
+
+.information-table .info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 5px;
+    border-bottom: 1px solid black;
+}
+
+.information-table img {
+    width: 40px;
+    height: 40px;
+}
+
+.information-table h5 {
+    font-weight: bold;
+    text-align: start;
+    margin-left: 10px;
+    width: 80%;
+}
+
+.bus-stop-contaienr {
+    margin: 1rem 1rem 0 1rem;
+}
+
+.bus-stop-contaienr .bus-stop-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    width: fit-content;
+}
+
+.bus-stop-contaienr .bus-stop-information .refresh-time {
+    display: flex;
+    justify-content: right;
+    font-size: 0.85rem;
+    padding: 0.25rem 0;
+}
+
+.bus-stop-contaienr .bus-stop-information .refresh-time button {
+    background-color: transparent;
+    margin-left: 0.2rem;
+    border: none;
+    cursor: pointer;
+}
+
+/* 모바일 */
+@media (max-width: 767px) {
+    .information-container {
+        display: none;
+    }
+}
