@@ -48,11 +48,12 @@ const App = () => {
           selectID={selectID} setSelectID={setSelectID}
           zoomLevel={zoomLevel} setZoomLevel={setZoomLevel}
           apiState={apiState} setApiState={setApiState} />
-        <Information station={station} settingBusStop={settingBusStop}
+        <Information station={station} settingBusStop={settingBusStop} setMapMode={setMapMode}
           mapMode={mapMode} selectBusStop={selectBusStop} />
         <button className="mode-change-button"
           onClick={() => {
-            setMapMode(0);
+            if (mapMode !== 0)
+              setMapMode(mapMode - 1);
           }}>
           <i className="fas fa-times"></i>
         </button>

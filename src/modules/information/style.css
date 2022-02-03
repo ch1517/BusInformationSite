@@ -2,11 +2,14 @@
     width: 25%;
     height: 100%;
     background-color: white;
-    overflow: auto;
     z-index: 500;
     box-shadow: -4px 0 2px -2px #8080806b;
     display: flex;
     flex-direction: column;
+}
+
+.information-container .bus-stop-list {
+    overflow: auto;
 }
 
 .information-container .loading {
@@ -17,7 +20,7 @@
 }
 
 .information-container .bus-arraval-list {
-    margin: 1rem;
+    padding: 1rem;
     overflow-y: auto;
 }
 
@@ -61,7 +64,7 @@
 
 .information-container .bus-arraval-list .route-info .route-start-end {
     color: gray;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
 }
 
 .information-container .bus-arraval-list .arraval-info {
@@ -76,6 +79,100 @@
 .information-container .bus-arraval-list .arraval-info span:first-child {
     color: #CC1100
 }
+
+.information-container .route-container {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.information-container .route-container .route-info-container {
+    margin: 0.25rem;
+    font-size: 0.75rem;
+}
+
+.information-container .route-container .route-info-container .route-info-item {
+    display: flex;
+    padding: 0.25rem;
+}
+
+.information-container .route-container .route-info-container .title {
+    margin-right: 1rem;
+    font-weight: bold;
+}
+
+.information-container .route-list {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+.information-container .route-list .route-item {
+    display: flex;
+}
+
+.information-container .route-list .route-item:first-child .bus-stop-text {
+    border-top: 1px solid #dcdcdc;
+}
+
+.information-container .route-list .route-item .bus-stop-text {
+    flex: 1 1;
+    border-bottom: 1px solid #dcdcdc;
+    padding: 0.5rem 0;
+}
+
+.information-container .route-list .route-item .bus-stop-text>div {
+    text-align: left;
+    padding: 0.2rem;
+}
+
+.information-container .route-list .route-item .bus-stop-text .node-name {
+    font-size: 0.85rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+.information-container .route-list .route-item .bus-stop-text .node-name .start-end-label {
+    border: 1px solid #146ACC;
+    color: #146ACC;
+    border-radius: 1rem;
+    padding: 0.15rem 0.3rem;
+    font-size: 0.75rem;
+    margin-left: 0.25rem;
+}
+
+.information-container .route-list .route-item .bus-stop-text .node-number {
+    font-size: 0.7rem;
+}
+
+.information-container .route-list .route-item .route-line {
+    width: 1.5rem;
+    border-right: 0.25rem solid #008039;
+    margin-right: 2.25rem;
+    position: relative;
+}
+
+.information-container .route-list .route-item .route-line .bus-logo {
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    top: calc(50% - 1rem);
+    left: calc(50% - 0.25rem);
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: #008039 solid 0.2rem;
+    border-radius: 2rem;
+}
+
+.information-container .route-list .route-item .route-line svg {
+    width: 15px;
+    height: 15px;
+}
+
 
 .information-table {
     width: 100%;
@@ -106,7 +203,7 @@
 }
 
 .bus-stop-contaienr {
-    margin: 1rem 1rem 0 1rem;
+    margin: 1rem
 }
 
 .bus-stop-contaienr .bus-stop-name {
