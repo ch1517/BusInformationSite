@@ -46,11 +46,14 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
   // route information
   const [routeInfo, setRouteInfo] = useState<RouteInformation | null>(null);
   const [arravalInRoute, setArravalInRoute] = useState<any>(null);
-
-  const BusArravalInfo = (data: any, index: number) => {
-    const time = Math.floor(data.arrtime! / 60);
+  /**
+   * 버스 노선 종류에 따른 색 반환
+   * @param routetp 노선 종류
+   * @returns 
+   */
+  const getBusColor = (routetp: string) => {
     let busColor: string = '#146ACC';
-    switch (data.routeInfo.routetp) {
+    switch (routetp) {
       case "간선버스":
         busColor = "#008039";
         break;
@@ -62,6 +65,11 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
       default:
         break;
     }
+    return busColor;
+  }
+  const BusArravalInfo = (data: any, index: number) => {
+    const time = Math.floor(data.arrtime! / 60);
+    let busColor: string = getBusColor(data.routeInfo.routetp);
     return (
       <div key={index} onClick={() => {
         getBusInfoByRouteId(data);
@@ -270,11 +278,18 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
       case 2:
         let startTime = convertVehicleTime(routeInfo?.routeInfo.startvehicletime);
         let endTime = convertVehicleTime(routeInfo?.routeInfo.endvehicletime);
-        let arravalList = arravalInRoute === null ? [] : arravalInRoute.map((data: any) => data.nodeord);
+        let arravalList: any;
+        if (arravalInRoute === null) arravalList = []
+        else {
+          arravalList = {};
+          arravalInRoute.forEach((data: any) => arravalList[data.nodeord] = data);
+        }
+        let busColor: string = getBusColor(routeInfo?.routeInfo.routetp);
         return (
           <div className="route-container">
             <div className="bus-stop-contaienr">
               <div className="bus-stop-name">
+                <BusSVG fill={busColor} />
                 {routeInfo!.routeno}
               </div>
               <div className="route-info-container">
@@ -305,10 +320,11 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
                 routeInfo.routeInfo.busStopList.map((data: any, index: number) => {
                   return (
                     <div className="route-item" key={index}>
-                      <div className="route-line">
-                        {arravalList.includes(data.nodeord) ?
+                      <div className="route-line" style={{ borderColor: busColor }}>
+                        {Object.keys(arravalList).includes(data.nodeord.toString()) ?
                           <>
-                            <div className="bus-logo"><BusSVG fill="#008039" /></div>
+                            <div className='bus-logo' style={{ borderColor: busColor }}><BusSVG fill={busColor} /></div>
+                            <div className='bus-number' style={{ color: busColor, borderColor: busColor }}>{arravalList[data.nodeord.toString()].vehicleno.slice(-7)}</div>
                           </>
                           : <></>
                         }
