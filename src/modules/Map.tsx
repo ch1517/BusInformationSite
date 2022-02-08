@@ -26,45 +26,52 @@ const checkLatLngOut = (item: any, _southWest: LatLngInterface, _northEast: LatL
  * @returns 
  */
 const nodeidFiltering = (nodeid: string) => {
-  return !nodeid.includes('GHB')
+  const ignoreList = ['GHB', 'GOB'];
+  let result = true;
+  ignoreList.forEach(name => {
+    if (nodeid.includes(name)) {
+      result = false;
+      return;
+    }
+  })
+  return result;
 }
-const getBusStationInfo = (setStation: (station: any[]) => void, apiState: boolean, center: LatLngInterface, _southWest: LatLngInterface, _northEast: LatLngInterface) => {
+const getBusStationInfo = async (setStation: (station: any[]) => void, apiState: boolean, center: LatLngInterface, _southWest: LatLngInterface, _northEast: LatLngInterface) => {
   let gpsLati = center["lat"];
   let gpsLong = center["lng"];
   let parameter = `?serviceKey=${serviceKey}&gpsLati=${gpsLati}&gpsLong=${gpsLong}`;
   let url = `/BusSttnInfoInqireService/getCrdntPrxmtSttnList${parameter}`;
   if (apiState) {
-    apiRequest(url)
-      .then((response) => {
-        let header = response.data.response.header;
-        let data = response.data.response.body;
-        if (header.resultCode === "00" || header.resultCode === 0) {
-          // api 조회 정상적으로 완료 했을 때 
-          let items = data.items.item;
-          let newData: any[] = [];
-          if (items == null || items === undefined) {
-            newData = [];
-          } else if (Array.isArray(items)) {
-            items.forEach((item) => {
-              if (checkLatLngOut(item, _southWest, _northEast) && nodeidFiltering(item.nodeid)) {
-                newData.push(item);
-              }
-            });
-          } else {
-            if (!checkLatLngOut(items, _southWest, _northEast)) {
-              newData = [items];
-            } else {
-              newData = [];
+    try {
+      const response = await apiRequest(url);
+      let header = response.data.response.header;
+      let data = response.data.response.body;
+      if (header.resultCode === "00" || header.resultCode === 0) {
+        // api 조회 정상적으로 완료 했을 때 
+        let items = data.items.item;
+        let newData: any[] = [];
+        if (items == null || items === undefined) {
+          newData = [];
+        } else if (Array.isArray(items)) {
+          items.forEach((item) => {
+            if (checkLatLngOut(item, _southWest, _northEast) && nodeidFiltering(item.nodeid)) {
+              newData.push(item);
             }
-          }
-          setStation(newData);
+          });
         } else {
-          console.log(data);
+          if (!checkLatLngOut(items, _southWest, _northEast)) {
+            newData = [items];
+          } else {
+            newData = [];
+          }
         }
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+        setStation(newData);
+      } else {
+        console.log(data);
+      }
+    } catch (e) {
+      console.log(e);
+    }
   }
 }
 interface MapEventProps {

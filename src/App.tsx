@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import './App.css';
+import './App.scss';
 import Map from './modules/Map';
 import Information from './modules/information';
 import Header from './modules/Header';
