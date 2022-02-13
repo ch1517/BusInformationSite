@@ -5,6 +5,7 @@ import { apiRequest } from '../../apiRequest';
 import RotateLoader from "react-spinners/RotateLoader";
 import './style.scss';
 import { BusSVG } from '../../static/images/bus';
+import useSWR from 'swr';
 
 const serviceKey = apiKey.station_key; // 버스정류장 정보조회 Key
 
@@ -24,12 +25,6 @@ interface RouteInformation {
   routeInfo?: any;
 }
 
-interface RouteInformation {
-  routeno?: string; // 노선번호
-  arrtime?: number; // 도착예정버스 도착예상시간[초]
-  arrprevstationcnt?: number; // 도착예정버스 남은 정류장 수
-}
-
 interface InformationProps {
   mapMode: number;
   station: any[];
@@ -39,75 +34,15 @@ interface InformationProps {
 }
 
 const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusStop, settingBusStop, setMapMode }) => {
-  const [arravalInfo, setArravalInfo] = useState<any>([]);
   const [refreshTime, setRefreshTime] = useState<string | null>(null);
   // 로딩 state
   const [loadState, setLoadState] = useState<boolean>(false);
-  // route information
-  const [routeInfo, setRouteInfo] = useState<RouteInformation | null>(null);
-  const [arravalInRoute, setArravalInRoute] = useState<any>(null);
-  /**
-   * 버스 노선 종류에 따른 색 반환
-   * @param routetp 노선 종류
-   * @returns 
-   */
-  const getBusColor = (routetp: string) => {
-    let busColor: string = '#146ACC';
-    switch (routetp) {
-      case "간선버스":
-        busColor = "#008039";
-        break;
-      case "좌석버스":
-      case "급행버스":
-      case "광역버스":
-        busColor = "#CC1100";
-        break;
-      default:
-        break;
-    }
-    return busColor;
-  }
-  const BusArravalInfo = (data: any, index: number) => {
-    const time = Math.floor(data.arrtime! / 60);
-    let busColor: string = getBusColor(data.routeInfo.routetp);
-    return (
-      <div key={index} onClick={() => {
-        getBusInfoByRouteId(data);
-        // 도착 정보 다시 가져오는 API 호출
-        getRouteAcctoBusLcList(data.routeid);
-      }}>
-        <BusSVG fill={busColor} />
-        <div className="info-div">
-          <div className="route-info">
-            <div className="route-number">
-              {data.routeno}
-            </div>
-            {typeof data.routeInfo !== "number" &&
-              <div className="route-start-end">
-                {`${data.routeInfo.startnodenm}↔${data.routeInfo.endnodenm}`}
-              </div>
-            }
-          </div>
-          {/* <div>{data.routeInfo.routetp}</div> */}
-          <div className="arraval-info">
-            <span>{time < 3 ? ("잠시 후 도착") : (`${time}분`)}</span>
-            <span>{data.arrprevstationcnt}정류장</span>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  const refreshTimeSave = () => {
-    const date = new Date();
-    setRefreshTime(`${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`);
-  }
-  const getBusArravalInfo = async () => {
-    setLoadState(true);
-    const parameter = `?serviceKey=${serviceKey}&cityCode=${selectBusStop!.citycode}&nodeId=${selectBusStop!.nodeid}`;
-    const url = `/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList${parameter}`;
+  const [selectRoute, setSelectRoute] = useState<RouteInformation | null>(null);
+  // const [arravalInRoute, setArravalInRoute] = useState<any>(null)
+  const getBusArravalInfoFetcher = async (url: string, args: string) => {
     try {
-      let response = await apiRequest(url);
+      setLoadState(true);
+      const response = await apiRequest(`${url}?serviceKey=${serviceKey}&${args}`);
       let header = response.data.response.header;
       let data = response.data.response.body;
       // api 조회 정상적으로 완료 했을 때 
@@ -142,10 +77,10 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
           }
         }
         // 도착 시간 순으로 정렬
-        newArr.sort((x: RouteInformation, y: RouteInformation) => x.arrtime! - y.arrtime!)
-        setArravalInfo(newArr);
+        newArr.sort((x: RouteInformation, y: RouteInformation) => x.arrtime! - y.arrtime!);
         refreshTimeSave();
         setLoadState(false);
+        return newArr;
       } else {
         console.log(data.header.resultCode)
       }
@@ -153,27 +88,113 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
       console.log(e);
     }
   }
+  const getBusInfoByRouteIdFecher = async (url: string, nodeData: RouteInformation) => {
+    const param = `cityCode=${selectBusStop?.citycode}&routeId=${nodeData.routeid}&numOfRows=500`;
+    try {
+      setLoadState(true);
+      const response = await apiRequest(`${url}?serviceKey=${serviceKey}&${param}`);
+      let header = response.data.response.header;
+      let data = response.data.response.body;
+      // api 조회 정상적으로 완료 했을 때 
+      if (header.resultCode === "00" || header.resultCode === 0) {
+        let item = data.items.item;
+        nodeData.routeInfo.busStopList = item;
+        setLoadState(false);
+        return nodeData;
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
   /**
    * 노선별로 버스의 GPS 위치정보의 목록을 조회
-   * @param routeid route id
    */
-  const getRouteAcctoBusLcList = async (routeid: string) => {
-    const parameter = `?serviceKey=${serviceKey}&cityCode=${selectBusStop!.citycode}&routeId=${routeid}`;
-    const url = `/BusLcInfoInqireService/getRouteAcctoBusLcList${parameter}`;
+  const getRouteAcctoBusLcListFetcher = async (url: string, nodeData: RouteInformation) => {
+    const param = `cityCode=${selectBusStop!.citycode}&routeId=${nodeData.routeid}`;
     try {
-      const response = await apiRequest(url);
+      const response = await apiRequest(`${url}?serviceKey=${serviceKey}&${param}`);
       let header = response.data.response.header;
       let data = response.data.response.body;
       // api 조회 정상적으로 완료 했을 때 
       if (header.resultCode === "00" || header.resultCode === 0) {
         let item = data.items.item;
         refreshTimeSave();
-        setArravalInRoute(item);
+        return item;
       }
     } catch (e) {
       console.log(e);
     }
+
   }
+  const { data: arravalInfo, mutate: arravalInfoMutate } = useSWR(
+    selectBusStop !== null && mapMode === 1 ? ['/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList', `&cityCode=${selectBusStop!.citycode}&nodeId=${selectBusStop!.nodeid}`] : null, getBusArravalInfoFetcher);
+
+  // route information
+  const { data: routeInfo } = useSWR(
+    selectBusStop !== null && selectRoute !== null && mapMode === 2 ? ['/BusRouteInfoInqireService/getRouteAcctoThrghSttnList', selectRoute] : null, getBusInfoByRouteIdFecher)
+
+  const { data: arravalInRoute, mutate: arravalInRouteMutate } = useSWR(
+    selectBusStop !== null && selectRoute !== null && mapMode === 2 ? ['/BusLcInfoInqireService/getRouteAcctoBusLcList', selectRoute] : null, getRouteAcctoBusLcListFetcher)
+
+  /**
+   * 버스 노선 종류에 따른 색 반환
+   * @param routetp 노선 종류
+   * @returns 
+   */
+  const getBusColor = (routetp: string) => {
+    let busColor: string = '#146ACC';
+    switch (routetp) {
+      case "간선버스":
+        busColor = "#008039";
+        break;
+      case "좌석버스":
+      case "급행버스":
+      case "광역버스":
+        busColor = "#CC1100";
+        break;
+      default:
+        break;
+    }
+    return busColor;
+  }
+
+  const BusArravalInfo = (data: any, index: number) => {
+    const time = Math.floor(data.arrtime! / 60);
+    let busColor: string = getBusColor(data.routeInfo.routetp);
+    return (
+      <div key={index} onClick={() => {
+        setMapMode(2);
+        setSelectRoute(data);
+        // 도착 정보 다시 가져오는 API 호출
+        arravalInRouteMutate();
+      }}>
+        <BusSVG fill={busColor} />
+        <div className="info-div">
+          <div className="route-info">
+            <div className="route-number">
+              {data.routeno}
+            </div>
+            {typeof data.routeInfo !== "number" &&
+              <div className="route-start-end">
+                {`${data.routeInfo.startnodenm}↔${data.routeInfo.endnodenm}`}
+              </div>
+            }
+          </div>
+          {/* <div>{data.routeInfo.routetp}</div> */}
+          <div className="arraval-info">
+            <span>{time < 3 ? ("잠시 후 도착") : (`${time}분`)}</span>
+            <span>{data.arrprevstationcnt}정류장</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const refreshTimeSave = () => {
+    const date = new Date();
+    setRefreshTime(`${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`);
+  }
+
   /**
    * 노선의 기본정보(종점, 출발점, 버스종류)를 반환하는 API 호출
    * @param routeno 
@@ -198,40 +219,13 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
       return -1;
     }
   }
-  const getBusInfoByRouteId = async (nodeData: any) => {
-    const parameter = `?serviceKey=${serviceKey}&cityCode=${selectBusStop?.citycode}&routeId=${nodeData.routeid}&numOfRows=500`;
-    const url = `/BusRouteInfoInqireService/getRouteAcctoThrghSttnList${parameter}`;
-    try {
-      const response = await apiRequest(url);
-      let header = response.data.response.header;
-      let data = response.data.response.body;
-      // api 조회 정상적으로 완료 했을 때 
-      if (header.resultCode === "00" || header.resultCode === 0) {
-        let item = data.items.item;
-        nodeData.routeInfo.busStopList = item;
-        setRouteInfo(nodeData);
-        setMapMode(2);
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
-  useEffect(() => {
-    console.log('arravalInRoute', arravalInRoute)
-  }, [arravalInRoute]);
 
   useEffect(() => {
     // X 눌러서 다시 bus stop list로 돌아올 때 arravalInfo 초기화
-    if (mapMode === 0 && arravalInfo.length > 0) {
-      setArravalInfo([]);
+    if (mapMode === 0 && typeof arravalInRoute !== "undefined" && arravalInfo.length > 0) {
+      arravalInfoMutate([]);
     }
   }, [mapMode]);
-  useEffect(() => {
-    if (selectBusStop !== null && mapMode === 1) {
-      getBusArravalInfo();
-    };
-  }, [selectBusStop, mapMode]);
 
   const convertVehicleTime = (time: string | number) => {
     let result = typeof time === "number" ? time.toString() : time;
@@ -271,7 +265,9 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
                 <div className="refresh-time">
                   {refreshTime} 기준
                   <button
-                    onClick={() => getBusArravalInfo()
+                    onClick={() => {
+                      arravalInfoMutate();
+                    }
                     }><i className="fas fa-sync-alt"></i>
                   </button>
                 </div>
@@ -281,7 +277,7 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
               <div className="loading"><RotateLoader /> </div>
               :
               <div className="bus-arraval-list">
-                {arravalInfo.length > 0 ?
+                {arravalInfo !== null && typeof arravalInfo !== "undefined" && arravalInfo.length > 0 ?
                   arravalInfo.map((data: any, index: number) => {
                     return BusArravalInfo(data, index);
                   })
@@ -293,10 +289,12 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
           </>
         )
       case 2:
+        if (typeof routeInfo === 'undefined')
+          return <div className="loading"><RotateLoader /> </div>;
         let startTime = convertVehicleTime(routeInfo?.routeInfo.startvehicletime);
         let endTime = convertVehicleTime(routeInfo?.routeInfo.endvehicletime);
         let arravalList: any;
-        if (arravalInRoute === null) arravalList = []
+        if (arravalInRoute === null || typeof arravalInRoute === 'undefined') arravalList = []
         else {
           arravalList = {};
           arravalInRoute.forEach((data: any) => arravalList[data.nodeord] = data);
@@ -327,7 +325,7 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
                 <div className="refresh-time">
                   {refreshTime} 기준
                   <button
-                    onClick={() => getRouteAcctoBusLcList(routeInfo?.routeid!)}><i className="fas fa-sync-alt"></i>
+                    onClick={() => arravalInRouteMutate()}><i className="fas fa-sync-alt"></i>
                   </button>
                 </div>
               </div>

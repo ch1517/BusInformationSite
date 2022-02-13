@@ -2,21 +2,16 @@ import React from 'react';
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents, Tooltip } from 'react-leaflet';
 import { useState, useEffect } from "react";
 import 'leaflet/dist/leaflet.css';
-import leaflet from 'leaflet';
+import leaflet, { LatLng } from 'leaflet';
 import apiKey from '../private/apiKey.json';
 import { apiRequest } from '../apiRequest';
+import useSWR from 'swr';
 const serviceKey = apiKey.station_key; // 버스정류장 정보조회 Key
-const BASE_ZOOM_LEVEL = 17;
-
-interface LatLngInterface {
-  lat: number;
-  lng: number;
-}
 
 // 화면의 latlng 내에 있는지 체크
-const checkLatLngOut = (item: any, _southWest: LatLngInterface, _northEast: LatLngInterface) => {
-  if (item["gpslati"] < _southWest.lat || item["gpslati"] > _northEast.lat
-    || item["gpslong"] < _southWest.lng || item["gpslong"] > _northEast.lng)
+const checkLatLngOut = (item: any, _southWest: LatLng, _northEast: LatLng) => {
+  if (item["lat"] < _southWest.lat || item["lat"] > _northEast.lat
+    || item["lng"] < _southWest.lng || item["lng"] > _northEast.lng)
     return false;
   return true;
 }
@@ -36,55 +31,16 @@ const nodeidFiltering = (nodeid: string) => {
   })
   return result;
 }
-const getBusStationInfo = async (setStation: (station: any[]) => void, apiState: boolean, center: LatLngInterface, _southWest: LatLngInterface, _northEast: LatLngInterface) => {
-  let gpsLati = center["lat"];
-  let gpsLong = center["lng"];
-  let parameter = `?serviceKey=${serviceKey}&gpsLati=${gpsLati}&gpsLong=${gpsLong}`;
-  let url = `/BusSttnInfoInqireService/getCrdntPrxmtSttnList${parameter}`;
-  if (apiState) {
-    try {
-      const response = await apiRequest(url);
-      let header = response.data.response.header;
-      let data = response.data.response.body;
-      if (header.resultCode === "00" || header.resultCode === 0) {
-        // api 조회 정상적으로 완료 했을 때 
-        let items = data.items.item;
-        let newData: any[] = [];
-        if (items == null || items === undefined) {
-          newData = [];
-        } else if (Array.isArray(items)) {
-          items.forEach((item) => {
-            if (checkLatLngOut(item, _southWest, _northEast) && nodeidFiltering(item.nodeid)) {
-              newData.push(item);
-            }
-          });
-        } else {
-          if (!checkLatLngOut(items, _southWest, _northEast)) {
-            newData = [items];
-          } else {
-            newData = [];
-          }
-        }
-        setStation(newData);
-      } else {
-        console.log(data);
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  }
-}
 interface MapEventProps {
   position: [number, number];
-  apiState: boolean;
+  setMap: (map: MapInfoInterface) => void;
   setPosition: (position: [number, number]) => void;
   setApiState: (apiState: boolean) => void;
-  setStation: (station: any[]) => void;
   setZoomLevel: (zoomLevel: number) => void;
   setZoomState: (zoomState: boolean) => void;
 }
 
-const MapEvent: React.FC<MapEventProps> = ({ position, apiState, setPosition, setApiState, setStation, setZoomLevel, setZoomState }) => {
+const MapEvent: React.FC<MapEventProps> = ({ position, setMap, setPosition, setApiState, setZoomLevel, setZoomState }) => {
   const map = useMap();
 
   useEffect(() => {
@@ -97,13 +53,6 @@ const MapEvent: React.FC<MapEventProps> = ({ position, apiState, setPosition, se
     map.setView(position, map.getZoom());
   }, [position]);
 
-  // var state = true; // 초기화 시 한번만 실행하기 위한 state 변수
-  const costomEvent = (zoomLevel: number) => {
-    if (zoomLevel >= BASE_ZOOM_LEVEL && apiState) {
-      getBusStationInfo(setStation, apiState, map.getCenter(), map.getBounds().getSouthWest(), map.getBounds().getNorthEast());
-      // setApiState(true);
-    }
-  }
   const mapEvents = useMapEvents({
     zoomstart: () => {
       setApiState(false);
@@ -117,7 +66,12 @@ const MapEvent: React.FC<MapEventProps> = ({ position, apiState, setPosition, se
     },
     // 지도 움직임 종료
     moveend: () => {
-      costomEvent(mapEvents.getZoom());
+      let mapInfo: MapInfoInterface = {};
+      mapInfo.center = map.getCenter();
+      mapInfo.southWest = map.getBounds().getSouthWest();
+      mapInfo.northEast = map.getBounds().getNorthEast();
+      setMap(mapInfo);
+      // costomEvent(mapEvents.getZoom());
     },
     // 스크롤로 이동할 때 false
     dragend: () => {
@@ -158,11 +112,61 @@ interface MapInterface {
   settingBusStop: (citycode: number, gpslati: number, gpslong: number, nodeid: string, nodenm: string) => void;
   setApiState: (apiState: boolean) => void;
 }
+interface MapInfoInterface {
+  center?: LatLng,
+  southWest?: LatLng,
+  northEast?: LatLng
+}
 const Map: React.FC<MapInterface> = ({ position, zoomLevel, station, selectID, apiState, setPosition, setZoomLevel, setStation, setSelectID, settingBusStop, setApiState }) => {
-  const BASE_ZOOM_LEVEL = 15;
+  const BASE_ZOOM_LEVEL = 17;
   const vworld_url = `https://api.vworld.kr/req/wmts/1.0.0/${apiKey.vworld_key}/Base/{z}/{y}/{x}.png`;
 
   const [zoomState, setZoomState] = useState(true);
+
+  const [map, setMap] = useState<MapInfoInterface | null>(null);
+  const [url, setUrl] = useState<String>(`gpsLati=${position[0]}&gpsLong=${position[1]}`);
+
+  useEffect(() => {
+    setStation([]);
+  }, [position]);
+
+  const fetcher = async (url: string, args: string) => {
+    const _southWest = map!.southWest;
+    const _northEast = map!.northEast;
+    if (apiState && _southWest !== undefined && _northEast !== undefined) {
+      try {
+        const response = await apiRequest(`${url}?serviceKey=${serviceKey}&${args}`);
+        let header = response.data.response.header;
+        let data = response.data.response.body;
+        if (header.resultCode === "00" || header.resultCode === 0) {
+          // api 조회 정상적으로 완료 했을 때 
+          let items = data.items.item;
+          let newData: any[] = [];
+          if (items == null || items === undefined) {
+            newData = [];
+          } else if (Array.isArray(items)) {
+            items.forEach((item) => {
+              if (checkLatLngOut(item, _southWest, _northEast) && nodeidFiltering(item.nodeid)) {
+                newData.push(item);
+              }
+            });
+          } else {
+            if (!checkLatLngOut(items, _southWest, _northEast)) {
+              newData = [items];
+            } else {
+              newData = [];
+            }
+          }
+          setStation(newData);
+        } else {
+          console.log(data);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  };
+  useSWR([`/BusSttnInfoInqireService/getCrdntPrxmtSttnList`, url], fetcher);
 
   let mapIcon = leaflet.icon({
     iconUrl: process.env.PUBLIC_URL + '/marker.png',
@@ -176,6 +180,11 @@ const Map: React.FC<MapInterface> = ({ position, zoomLevel, station, selectID, a
     setSelectID(nodeid);
     settingBusStop(citycode, gpslati, gpslong, nodeid, nodenm);
   }
+  useEffect(() => {
+    if (map !== null && zoomLevel >= BASE_ZOOM_LEVEL && apiState) {
+      setUrl(`gpsLati=${map.center!["lat"]}&gpsLong=${map.center!["lng"]}`);
+    }
+  }, [map]);
 
   return (
     <div className="map-container">
@@ -185,10 +194,9 @@ const Map: React.FC<MapInterface> = ({ position, zoomLevel, station, selectID, a
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
           url={vworld_url}
         />
-        <MapEvent apiState={apiState} setApiState={setApiState}
-          position={position} setPosition={setPosition}
-          setZoomLevel={setZoomLevel} setStation={setStation}
-          setZoomState={setZoomState} />
+        <MapEvent setApiState={setApiState}
+          position={position} setPosition={setPosition} setMap={setMap}
+          setZoomLevel={setZoomLevel} setZoomState={setZoomState} />
         {/* zoom 중인 경우 marker 표시를 안하기 위해서 apiState 추가 */}
         {zoomState
           && zoomLevel >= BASE_ZOOM_LEVEL

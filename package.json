@@ -27,6 +27,7 @@
     "react-scripts": "4.0.3",
     "react-spinners": "^0.11.0",
     "request": "^2.88.2",
+    "swr": "^1.2.1",
     "typescript": "^4.5.5",
     "web-vitals": "^1.1.0",
     "xml-js": "^1.6.11"
