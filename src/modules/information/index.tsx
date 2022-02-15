@@ -1,140 +1,17 @@
 
 import React, { useEffect, useState } from 'react';
-import apiKey from '../../private/apiKey.json';
-import { apiRequest } from '../../apiRequest';
 import RotateLoader from "react-spinners/RotateLoader";
 import './style.scss';
 import { BusSVG } from '../../static/images/bus';
-import useSWR from 'swr';
-
-const serviceKey = apiKey.station_key; // 버스정류장 정보조회 Key
-
-interface BusStopInterface {
-  citycode: number;
-  gpslati: number;
-  gpslong: number;
-  nodeid: string;
-  nodenm: string;
-  // nodeno: number;
-}
-interface RouteInformation {
-  routeid?: string; //노선 ID
-  routeno?: string; // 노선번호
-  arrtime?: number; // 도착예정버스 도착예상시간[초]
-  arrprevstationcnt?: number; // 도착예정버스 남은 정류장 수
-  routeInfo?: any;
-}
-
-interface InformationProps {
-  mapMode: number;
-  station: any[];
-  selectBusStop: BusStopInterface | null;
-  settingBusStop: (citycode: number, gpslati: number, gpslong: number, nodeid: string, nodenm: string) => void;
-  setMapMode: (mapMode: number) => void;
-}
+import { BusStopInterface, InformationProps, RouteInformation } from './interface';
+import { useArravalInfo, useArravalInRoute, useRouteInfo } from './state';
 
 const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusStop, settingBusStop, setMapMode }) => {
   const [refreshTime, setRefreshTime] = useState<string | null>(null);
-  // 로딩 state
-  const [loadState, setLoadState] = useState<boolean>(false);
   const [selectRoute, setSelectRoute] = useState<RouteInformation | null>(null);
-  // const [arravalInRoute, setArravalInRoute] = useState<any>(null)
-  const getBusArravalInfoFetcher = async (url: string, args: string) => {
-    try {
-      setLoadState(true);
-      const response = await apiRequest(`${url}?serviceKey=${serviceKey}&${args}`);
-      let header = response.data.response.header;
-      let data = response.data.response.body;
-      // api 조회 정상적으로 완료 했을 때 
-      if (header.resultCode === "00" || header.resultCode === 0) {
-        var items = data.items;
-        var newArr: any = [];
-        if (items['item'] != null) {
-          items = items.item;
-          // 배열이며, 길이가 0이 아닐 때
-          if (items.length !== 0 && Array.isArray(items)) {
-            newArr = await Promise.all(items.map(async ({ routeno, routeid, arrtime, arrprevstationcnt }) => {
-              var newInfo: RouteInformation = {};
-              newInfo['routeid'] = routeid;
-              newInfo['routeno'] = routeno;
-              newInfo['arrtime'] = arrtime;
-              newInfo['arrprevstationcnt'] = arrprevstationcnt;
-              let routeInfo = await getRouteInfoIem(routeid);
-              newInfo['routeInfo'] = routeInfo;
-              return newInfo;
-            }))
-          } else if (typeof (items) === 'object') {
-            let newInfo: RouteInformation = {};
-            newInfo['routeid'] = items['routeid'];
-            newInfo['routeno'] = items['routeno'];
-            newInfo['arrtime'] = items['arrtime'];
-            newInfo['arrprevstationcnt'] = items['arrprevstationcnt'];
-            let routeInfo = await getRouteInfoIem(items['routeid']);
-            newInfo['routeInfo'] = routeInfo;
-            newArr.push(newInfo);
-          } else {
-            console.log(items);
-          }
-        }
-        // 도착 시간 순으로 정렬
-        newArr.sort((x: RouteInformation, y: RouteInformation) => x.arrtime! - y.arrtime!);
-        refreshTimeSave();
-        setLoadState(false);
-        return newArr;
-      } else {
-        console.log(data.header.resultCode)
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  }
-  const getBusInfoByRouteIdFecher = async (url: string, nodeData: RouteInformation) => {
-    const param = `cityCode=${selectBusStop?.citycode}&routeId=${nodeData.routeid}&numOfRows=500`;
-    try {
-      setLoadState(true);
-      const response = await apiRequest(`${url}?serviceKey=${serviceKey}&${param}`);
-      let header = response.data.response.header;
-      let data = response.data.response.body;
-      // api 조회 정상적으로 완료 했을 때 
-      if (header.resultCode === "00" || header.resultCode === 0) {
-        let item = data.items.item;
-        nodeData.routeInfo.busStopList = item;
-        setLoadState(false);
-        return nodeData;
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  }
-  /**
-   * 노선별로 버스의 GPS 위치정보의 목록을 조회
-   */
-  const getRouteAcctoBusLcListFetcher = async (url: string, nodeData: RouteInformation) => {
-    const param = `cityCode=${selectBusStop!.citycode}&routeId=${nodeData.routeid}`;
-    try {
-      const response = await apiRequest(`${url}?serviceKey=${serviceKey}&${param}`);
-      let header = response.data.response.header;
-      let data = response.data.response.body;
-      // api 조회 정상적으로 완료 했을 때 
-      if (header.resultCode === "00" || header.resultCode === 0) {
-        let item = data.items.item;
-        refreshTimeSave();
-        return item;
-      }
-    } catch (e) {
-      console.log(e);
-    }
-
-  }
-  const { data: arravalInfo, mutate: arravalInfoMutate } = useSWR(
-    selectBusStop !== null && mapMode === 1 ? ['/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList', `&cityCode=${selectBusStop!.citycode}&nodeId=${selectBusStop!.nodeid}`] : null, getBusArravalInfoFetcher);
-
-  // route information
-  const { data: routeInfo } = useSWR(
-    selectBusStop !== null && selectRoute !== null && mapMode === 2 ? ['/BusRouteInfoInqireService/getRouteAcctoThrghSttnList', selectRoute] : null, getBusInfoByRouteIdFecher)
-
-  const { data: arravalInRoute, mutate: arravalInRouteMutate } = useSWR(
-    selectBusStop !== null && selectRoute !== null && mapMode === 2 ? ['/BusLcInfoInqireService/getRouteAcctoBusLcList', selectRoute] : null, getRouteAcctoBusLcListFetcher)
+  const { arravalInfo, arravalInfoState, arravalInfoMutate } = useArravalInfo(selectBusStop, mapMode);
+  const { routeInfo, routeInfoState } = useRouteInfo(selectBusStop, mapMode, selectRoute);
+  const { arravalInRoute, arravalInRouteState, arravalInRouteMutate } = useArravalInRoute(selectBusStop, mapMode, selectRoute);
 
   /**
    * 버스 노선 종류에 따른 색 반환
@@ -195,31 +72,6 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
     setRefreshTime(`${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`);
   }
 
-  /**
-   * 노선의 기본정보(종점, 출발점, 버스종류)를 반환하는 API 호출
-   * @param routeno 
-   * @param routeid 
-   * @returns 
-   */
-  const getRouteInfoIem = async (routeid: string) => {
-    const parameter = `?serviceKey=${serviceKey}&cityCode=${selectBusStop!.citycode}&routeId=${routeid}`;
-    const url = `/BusRouteInfoInqireService/getRouteInfoIem${parameter}`;
-    try {
-      const response = await apiRequest(url);
-      let header = response.data.response.header;
-      let data = response.data.response.body;
-      // api 조회 정상적으로 완료 했을 때 
-      if (header.resultCode === "00" || header.resultCode === 0) {
-        let item = data.items.item;
-        return item;
-      }
-      return header.resultCode;
-    } catch (e) {
-      console.log(e);
-      return -1;
-    }
-  }
-
   useEffect(() => {
     // X 눌러서 다시 bus stop list로 돌아올 때 arravalInfo 초기화
     if (mapMode === 0 && typeof arravalInRoute !== "undefined" && arravalInfo.length > 0) {
@@ -227,8 +79,12 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
     }
   }, [mapMode]);
 
+  useEffect(() => {
+    refreshTimeSave();
+  }, [arravalInfo, arravalInRoute]);
+
   const convertVehicleTime = (time: string | number) => {
-    let result = typeof time === "number" ? time.toString() : time;
+    let result = typeof time === "number" ? time.toString().padStart(4, '0') : time;
     result = `${result.substr(0, 2)}:${result.substr(2)}`
     return result;
   }
@@ -273,11 +129,11 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
                 </div>
               </div>
             </div>
-            {loadState ?
+            {arravalInfoState ?
               <div className="loading"><RotateLoader /> </div>
               :
               <div className="bus-arraval-list">
-                {arravalInfo !== null && typeof arravalInfo !== "undefined" && arravalInfo.length > 0 ?
+                {arravalInfo.length > 0 ?
                   arravalInfo.map((data: any, index: number) => {
                     return BusArravalInfo(data, index);
                   })
@@ -289,12 +145,11 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
           </>
         )
       case 2:
-        if (typeof routeInfo === 'undefined')
-          return <div className="loading"><RotateLoader /> </div>;
+        if (routeInfoState) return <div className="loading"><RotateLoader /> </div>;
         let startTime = convertVehicleTime(routeInfo?.routeInfo.startvehicletime);
         let endTime = convertVehicleTime(routeInfo?.routeInfo.endvehicletime);
         let arravalList: any;
-        if (arravalInRoute === null || typeof arravalInRoute === 'undefined') arravalList = []
+        if (arravalInRouteState) arravalList = [];
         else {
           arravalList = {};
           arravalInRoute.forEach((data: any) => arravalList[data.nodeord] = data);
@@ -331,30 +186,29 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
               </div>
             </div>
             <div className="route-list">
-              {routeInfo !== null &&
-                routeInfo.routeInfo.busStopList.map((data: any, index: number) => {
-                  return (
-                    <div className="route-item" key={index}>
-                      <div className="route-line" style={{ borderColor: busColor }}>
-                        {Object.keys(arravalList).includes(data.nodeord.toString()) ?
-                          <>
-                            <div className='bus-logo' style={{ borderColor: busColor }}><BusSVG fill={busColor} /></div>
-                            <div className='bus-number' style={{ color: busColor, borderColor: busColor }}>{arravalList[data.nodeord.toString()].vehicleno.slice(-7)}</div>
-                          </>
-                          : <></>
-                        }
-                      </div>
-                      <div className="bus-stop-text">
-                        <div className="node-name">{data.nodenm}
-                          {routeInfo.routeInfo.startnodenm === data.nodenm && <div className="start-end-label">기점</div>}
-                          {routeInfo.routeInfo.endnodenm === data.nodenm && <div className="start-end-label">종점</div>}
-                        </div>
-                        <div className="node-number">{data.nodeno}</div>
-                      </div>
+              {routeInfo!.routeInfo.busStopList.map((data: any, index: number) => {
+                return (
+                  <div className="route-item" key={index}>
+                    <div className="route-line" style={{ borderColor: busColor }}>
+                      {Object.keys(arravalList).includes(data.nodeord.toString()) ?
+                        <>
+                          <div className='bus-logo' style={{ borderColor: busColor }}><BusSVG fill={busColor} /></div>
+                          <div className='bus-number' style={{ color: busColor, borderColor: busColor }}>{arravalList[data.nodeord.toString()].vehicleno.slice(-7)}</div>
+                        </>
+                        : <></>
+                      }
                     </div>
-                  )
-                }
-                )}
+                    <div className="bus-stop-text">
+                      <div className="node-name">{data.nodenm}
+                        {routeInfo!.routeInfo.startnodenm === data.nodenm && <div className="start-end-label">기점</div>}
+                        {routeInfo!.routeInfo.endnodenm === data.nodenm && <div className="start-end-label">종점</div>}
+                      </div>
+                      <div className="node-number">{data.nodeno}</div>
+                    </div>
+                  </div>
+                )
+              }
+              )}
             </div>
           </div >
         )

@@ -138,7 +138,7 @@
         margin: 10px;
         padding: 10px;
         border-radius: 10px;
-        background-color: #ffffffaa;
+        background-color: #6773a988;
         position: absolute;
         bottom: 0;
         right: 25%;
@@ -148,6 +148,10 @@
         display: flex;
         justify-content: center;
         align-items: center;
+
+        h5 {
+          color: white;
+        }
       }
 
       .leaflet-container {

@@ -40,7 +40,7 @@ const App = () => {
 
   return (
     <div className="App">
-      <Header />
+      {/* <Header /> */}
       <div className="contents">
         <Map station={station} setStation={setStation}
           settingBusStop={settingBusStop}

@@ -126,10 +126,6 @@ const Map: React.FC<MapInterface> = ({ position, zoomLevel, station, selectID, a
   const [map, setMap] = useState<MapInfoInterface | null>(null);
   const [url, setUrl] = useState<String>(`gpsLati=${position[0]}&gpsLong=${position[1]}`);
 
-  useEffect(() => {
-    setStation([]);
-  }, [position]);
-
   const fetcher = async (url: string, args: string) => {
     const _southWest = map!.southWest;
     const _northEast = map!.northEast;
