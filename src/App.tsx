@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './App.scss';
-import Map from './modules/Map';
+import Map from './modules/map';
 import Information from './modules/information';
 import Header from './modules/Header';
 
