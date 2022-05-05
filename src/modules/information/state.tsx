@@ -96,8 +96,11 @@ export const useRouteInfo = (selectBusStop: BusStopInterface | null, mapMode: nu
             let data = response.data.response.body;
             // api 조회 정상적으로 완료 했을 때 
             if (header.resultCode === "00" || header.resultCode === 0) {
-                let item = data.items.item;
-                nodeData.routeInfo.busStopList = item;
+                let item = data.items?.item;
+                if (nodeData.routeInfo)
+                    nodeData.routeInfo.busStopList = item ? item : [];
+                else
+                    nodeData.routeInfo = undefined;
                 return nodeData;
             }
         } catch (e) {

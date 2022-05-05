@@ -37,7 +37,7 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
 
   const BusArravalInfo = (data: any, index: number) => {
     const time = Math.floor(data.arrtime! / 60);
-    let busColor: string = getBusColor(data.routeInfo.routetp);
+    let busColor: string = getBusColor(data?.routeInfo?.routetp);
     return (
       <div key={index} onClick={() => {
         setMapMode(2);
@@ -51,7 +51,7 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
             <div className="route-number">
               {data.routeno}
             </div>
-            {typeof data.routeInfo !== "number" &&
+            {data.routeInfo && typeof data.routeInfo !== "number" &&
               <div className="route-start-end">
                 {`${data.routeInfo.startnodenm}↔${data.routeInfo.endnodenm}`}
               </div>
@@ -84,6 +84,7 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
   }, [arravalInfo, arravalInRoute]);
 
   const convertVehicleTime = (time: string | number) => {
+    if (!time) return '';
     let result = typeof time === "number" ? time.toString().padStart(4, '0') : time;
     result = `${result.substr(0, 2)}:${result.substr(2)}`
     return result;
@@ -145,16 +146,21 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
           </>
         )
       case 2:
+        console.log(routeInfoState, routeInfo);
         if (routeInfoState) return <div className="loading"><RotateLoader /> </div>;
-        let startTime = convertVehicleTime(routeInfo?.routeInfo.startvehicletime);
-        let endTime = convertVehicleTime(routeInfo?.routeInfo.endvehicletime);
+        let startTime = convertVehicleTime(routeInfo?.routeInfo?.startvehicletime);
+        let endTime = convertVehicleTime(routeInfo?.routeInfo?.endvehicletime);
         let arravalList: any;
         if (arravalInRouteState) arravalList = [];
         else {
           arravalList = {};
-          arravalInRoute.forEach((data: any) => arravalList[data.nodeord] = data);
+          let arravalInRoutetmp = arravalInRoute;
+          // 만약 arravalInRoute가 array가 아닌 object라면
+          if (arravalInRoute && !Array.isArray(arravalInRoute))
+            arravalInRoutetmp = [arravalInRoute];
+          arravalInRoutetmp?.forEach((data: any) => arravalList[data.nodeord] = data);
         }
-        let busColor: string = getBusColor(routeInfo?.routeInfo.routetp);
+        let busColor: string = getBusColor(routeInfo?.routeInfo?.routetp);
         return (
           <div className="route-container">
             <div className="bus-stop-container">
@@ -162,20 +168,22 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
                 <BusSVG fill={busColor} />
                 {routeInfo!.routeno}
               </div>
-              <div className="route-info-container">
-                <div className="route-info-item">
-                  <div className="title">노선유형</div>
-                  <div className="information">{routeInfo?.routeInfo.routetp}</div>
+              {routeInfo?.routeInfo &&
+                <div className="route-info-container">
+                  <div className="route-info-item">
+                    <div className="title">노선유형</div>
+                    <div className="information">{routeInfo?.routeInfo?.routetp}</div>
+                  </div>
+                  <div className="route-info-item">
+                    <div className="title">운행시간</div>
+                    <div className="information">첫차 {startTime}, 막차 {endTime}</div>
+                  </div>
+                  <div className="route-info-item">
+                    <div className="title">배차간격</div>
+                    <div className="information">평일 {routeInfo?.routeInfo?.intervaltime ?? ''}분, 토요일 {routeInfo?.routeInfo?.intervalsattime ?? ''}분, 일요일 {routeInfo?.routeInfo?.intervalsuntime ?? ''}분</div>
+                  </div>
                 </div>
-                <div className="route-info-item">
-                  <div className="title">운행시간</div>
-                  <div className="information">첫차 {startTime}, 막차 {endTime}</div>
-                </div>
-                <div className="route-info-item">
-                  <div className="title">배차간격</div>
-                  <div className="information">평일 {routeInfo?.routeInfo.intervaltime}분, 토요일 {routeInfo?.routeInfo.intervalsattime}분, 일요일 {routeInfo?.routeInfo.intervalsuntime}분</div>
-                </div>
-              </div>
+              }
               <div className="bus-stop-information">
                 <div className="refresh-time">
                   {refreshTime} 기준
@@ -186,7 +194,7 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
               </div>
             </div>
             <div className="route-list">
-              {routeInfo!.routeInfo.busStopList.map((data: any, index: number) => {
+              {routeInfo!.routeInfo?.busStopList.map((data: any, index: number) => {
                 return (
                   <div className="route-item" key={index}>
                     <div className="route-line" style={{ borderColor: busColor }}>
@@ -200,8 +208,8 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
                     </div>
                     <div className="bus-stop-text">
                       <div className="node-name">{data.nodenm}
-                        {routeInfo!.routeInfo.startnodenm === data.nodenm && <div className="start-end-label">기점</div>}
-                        {routeInfo!.routeInfo.endnodenm === data.nodenm && <div className="start-end-label">종점</div>}
+                        {routeInfo!.routeInfo?.startnodenm === data.nodenm && <div className="start-end-label">기점</div>}
+                        {routeInfo!.routeInfo?.endnodenm === data.nodenm && <div className="start-end-label">종점</div>}
                       </div>
                       <div className="node-number">{data.nodeno}</div>
                     </div>

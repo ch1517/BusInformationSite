@@ -1,0 +1,4 @@
+# https://www.robotstxt.org/robotstxt.html
+Sitemap: https://bus-information-site.herokuapp.com
+User-agent: *
+Disallow:
