@@ -146,7 +146,6 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
           </>
         )
       case 2:
-        console.log(routeInfoState, routeInfo);
         if (routeInfoState) return <div className="loading"><RotateLoader /> </div>;
         let startTime = convertVehicleTime(routeInfo?.routeInfo?.startvehicletime);
         let endTime = convertVehicleTime(routeInfo?.routeInfo?.endvehicletime);

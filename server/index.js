@@ -51,7 +51,7 @@ app.use('/api/*', (req, res) => {
     var parameter = req.url.replace('/', '');
     request({
         method: 'GET',
-        uri: 'http://openapi.tago.go.kr/openapi/service' + baseUrl + parameter
+        uri: 'http://apis.data.go.kr/1613000' + baseUrl + parameter
     }, (err, response, body) => {
         body = convert.xml2js(body, options);
         res.send(body);
