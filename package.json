@@ -33,8 +33,8 @@
     "xml-js": "^1.6.11"
   },
   "scripts": {
-    "dev": "HOST=0.0.0.0 PORT=80 npm-run-all --parallel start start:client",
-    "start": "HOST=0.0.0.0 PORT=80 node ./server/index.js",
+    "dev": "npm-run-all --parallel start start:client",
+    "start": "node ./server/index.js",
     "start:client": "cross-env NODE_PATH=src react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
