@@ -1,11 +1,10 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 
-export const apiRequest = (url: string) => {
-  return axios.get(`${process.env.REACT_APP_API_URL}${url}`)
-    .then(response => {
-      return response;
-    })
-    .catch(err => {
-      return err;
-    })
+export const apiRequest = async (url: string): Promise<AxiosResponse<any>> => {
+  try{
+    const response = await axios.get(`http://apis.data.go.kr/1613000${url}`);
+    return response;
+  } catch(e: any){
+    return e;
+  }
 }
