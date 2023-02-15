@@ -67,7 +67,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ selectID, nodeid, nodenm 
   return (
     <Tooltip direction="top" opacity={1} permanent interactive>
       <div className={selectID === nodeid ? "select" : ""}>
-        <div><img alt="" className="busIcon" src={selectID === nodeid ? './marker.png' : './marker_white.png'} /></div>
+        <div><img alt="" className="busIcon" src={process.env.REACT_APP_PUBLIC_URL + (selectID === nodeid ? '/marker.png' : '/marker_white.png')} /></div>
         <div>
           <span>{nodenm}</span>
           <span>{nodeid}</span>
@@ -95,8 +95,8 @@ const Map: React.FC<MapInterface> = ({ position, zoomLevel, station, selectID, a
   }, [map]);
 
   let mapIcon = leaflet.icon({
-    iconUrl: './marker.png',
-    iconRetinaUrl: './marker.png',
+    iconUrl: `${process.env.REACT_APP_PUBLIC_URL}/marker.png`,
+    iconRetinaUrl: `${process.env.REACT_APP_PUBLIC_URL}/marker.png`,
     iconAnchor: [15, 15],
     popupAnchor: [0, 0],
     iconSize: [30, 30],

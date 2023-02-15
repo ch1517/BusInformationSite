@@ -102,7 +102,7 @@ const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusSt
                   return (
                     <div key={index} onClick={() => settingBusStop(citycode, gpslati, gpslong, nodeid, nodenm)}>
                       <div className='info'>
-                        <img src='./marker.png' alt="" />
+                        <img src={`${process.env.REACT_APP_PUBLIC_URL}/marker.png`} alt="" />
                         <h5>{nodenm}({nodeid})</h5>
                       </div>
                     </div>
