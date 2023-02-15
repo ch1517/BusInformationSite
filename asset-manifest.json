@@ -1,0 +1,25 @@
+{
+  "files": {
+    "main.css": "/BusInformationSite/static/css/main.b3dcaebf.chunk.css",
+    "main.js": "/BusInformationSite/static/js/main.2d8dbe8e.chunk.js",
+    "main.js.map": "/BusInformationSite/static/js/main.2d8dbe8e.chunk.js.map",
+    "runtime-main.js": "/BusInformationSite/static/js/runtime-main.b50a9569.js",
+    "runtime-main.js.map": "/BusInformationSite/static/js/runtime-main.b50a9569.js.map",
+    "static/css/2.9ce8ecbc.chunk.css": "/BusInformationSite/static/css/2.9ce8ecbc.chunk.css",
+    "static/js/2.851833ac.chunk.js": "/BusInformationSite/static/js/2.851833ac.chunk.js",
+    "static/js/2.851833ac.chunk.js.map": "/BusInformationSite/static/js/2.851833ac.chunk.js.map",
+    "static/js/3.05fe3251.chunk.js": "/BusInformationSite/static/js/3.05fe3251.chunk.js",
+    "static/js/3.05fe3251.chunk.js.map": "/BusInformationSite/static/js/3.05fe3251.chunk.js.map",
+    "index.html": "/BusInformationSite/index.html",
+    "static/css/2.9ce8ecbc.chunk.css.map": "/BusInformationSite/static/css/2.9ce8ecbc.chunk.css.map",
+    "static/css/main.b3dcaebf.chunk.css.map": "/BusInformationSite/static/css/main.b3dcaebf.chunk.css.map",
+    "static/js/2.851833ac.chunk.js.LICENSE.txt": "/BusInformationSite/static/js/2.851833ac.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.b50a9569.js",
+    "static/css/2.9ce8ecbc.chunk.css",
+    "static/js/2.851833ac.chunk.js",
+    "static/css/main.b3dcaebf.chunk.css",
+    "static/js/main.2d8dbe8e.chunk.js"
+  ]
+}
