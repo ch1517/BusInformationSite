@@ -12,7 +12,7 @@
 # /src/private
 
 # production
-# /build
+/build
 
 # misc
 .DS_Store
