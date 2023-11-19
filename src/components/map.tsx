@@ -6,7 +6,7 @@ import leaflet from 'leaflet';
 import { MapInfoInterface, MapInterface } from '../types/map';
 import { useStations } from '../states/map';
 import apiKey from '../private/apiKey.json';
-import './map/style.scss';
+import '../assets/map.scss';
 
 interface MapEventProps {
   position: [number, number];

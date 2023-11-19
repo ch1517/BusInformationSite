@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import RotateLoader from "react-spinners/RotateLoader";
-import './information/style.scss';
+import '../assets/information.scss';
 import { BusSVG } from '../static/images/bus';
 import { BusStopInterface, InformationProps, RouteInformation } from '../types/information';
 import { useArravalInfo, useArravalInRoute, useRouteInfo } from '../states/information';
