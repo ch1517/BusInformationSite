@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import './App.scss';
-import Map from './modules/map';
-import Information from './modules/information';
-import Header from './modules/Header';
+import Map from './components/map';
+import Information from './components/information';
 
 interface BusStopInterface {
   citycode: number;

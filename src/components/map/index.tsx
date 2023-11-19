@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, useMap, useMapEvents, Tooltip } from '
 import { useState, useEffect } from "react";
 import 'leaflet/dist/leaflet.css';
 import leaflet from 'leaflet';
-import { MapInfoInterface, MapInterface } from './interface';
+import { MapInfoInterface, MapInterface } from '../../types/map';
 import { useStations } from './state';
 import apiKey from '../../private/apiKey.json';
 import './style.scss';

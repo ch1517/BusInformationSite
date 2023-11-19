@@ -2,7 +2,7 @@ import { apiRequest } from '../../apiRequest';
 import { LatLng } from 'leaflet';
 import useSWR from 'swr';
 import apiKey from '../../private/apiKey.json';
-import { MapInfoInterface } from './interface';
+import { MapInfoInterface } from '../../types/map';
 
 const serviceKey = apiKey.station_key; // 버스정류장 정보조회 Key
 export const useStations = (position: [number, number], map: MapInfoInterface | null, apiState: boolean) => {
