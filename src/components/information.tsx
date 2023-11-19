@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import RotateLoader from "react-spinners/RotateLoader";
-import './style.scss';
-import { BusSVG } from '../../static/images/bus';
-import { BusStopInterface, InformationProps, RouteInformation } from '../../types/information';
-import { useArravalInfo, useArravalInRoute, useRouteInfo } from './state';
+import './information/style.scss';
+import { BusSVG } from '../static/images/bus';
+import { BusStopInterface, InformationProps, RouteInformation } from '../types/information';
+import { useArravalInfo, useArravalInRoute, useRouteInfo } from '../states/information';
 
 const Information: React.FC<InformationProps> = ({ mapMode, station, selectBusStop, settingBusStop, setMapMode }) => {
   const [refreshTime, setRefreshTime] = useState<string | null>(null);

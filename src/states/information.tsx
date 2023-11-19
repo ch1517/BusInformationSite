@@ -1,7 +1,7 @@
-import apiKey from '../../private/apiKey.json';
-import { apiRequest } from '../../apiRequest';
+import apiKey from '../private/apiKey.json';
+import { apiRequest } from '../apiRequest';
 import useSWR from 'swr';
-import { BusStopInterface, RouteInformation } from '../../types/information';
+import { BusStopInterface, RouteInformation } from '../types/information';
 const serviceKey = apiKey.station_key; // 버스정류장 정보조회 Key
 
 /**
